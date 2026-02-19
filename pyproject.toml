@@ -1,7 +1,10 @@
 [project]
 name = "advanced-ml"
 version = "0.1.0"
-description = "Add your description here"
+description = "Advanced Machine Learning - DTU"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []
+
+[tool.uv.workspace]
+members = ["miniproject1", "miniproject2", "miniproject3"]

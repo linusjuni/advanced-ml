@@ -1,0 +1,31 @@
+version = 1
+revision = 2
+requires-python = ">=3.12"
+
+[manifest]
+members = [
+    "advanced-ml",
+    "miniproject1",
+    "miniproject2",
+    "miniproject3",
+]
+
+[[package]]
+name = "advanced-ml"
+version = "0.1.0"
+source = { virtual = "." }
+
+[[package]]
+name = "miniproject1"
+version = "0.1.0"
+source = { virtual = "miniproject1" }
+
+[[package]]
+name = "miniproject2"
+version = "0.1.0"
+source = { virtual = "miniproject2" }
+
+[[package]]
+name = "miniproject3"
+version = "0.1.0"
+source = { virtual = "miniproject3" }
