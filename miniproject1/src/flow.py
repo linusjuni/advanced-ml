@@ -68,9 +68,13 @@ class MaskedCouplingLayer(nn.Module):
         log_det_J: [torch.Tensor]
             The log determinant of the Jacobian of dimension `(batch_size,)`.
         """
-        # TODO: Implement the forward pass of the affine coupling layer
-        x = z
-        log_det_J = torch.zeros(z.shape[0])
+        # Eq (12) from week 2 exercises:
+        # z' = b*z + (1-b) * (z * exp(s(b*z)) + t(b*z))
+        s = self.scale_net(self.mask * z)
+        t = self.translation_net(self.mask * z)
+        x = self.mask * z + (1 - self.mask) * (z * torch.exp(s) + t)
+        # Eq (14): log det J = sum((1 - b_i) * s_i(b * z))
+        log_det_J = torch.sum((1 - self.mask) * s, dim=-1)
         return x, log_det_J
 
     def inverse(self, x):
@@ -86,9 +90,13 @@ class MaskedCouplingLayer(nn.Module):
         log_det_J: [torch.Tensor]
             The log determinant of the Jacobian of dimension `(batch_size,)`.
         """
-        # TODO: Implement the inverse pass of the affine coupling layer
-        z = x
-        log_det_J = torch.zeros(x.shape[0])
+        # Eq (13) from week 2 exercises:
+        # z = b*z' + (1-b) * ((z' - t(b*z')) * exp(-s(b*z')))
+        s = self.scale_net(self.mask * x)
+        t = self.translation_net(self.mask * x)
+        z = self.mask * x + (1 - self.mask) * ((x - t) * torch.exp(-s))
+        # Inverse log det J is negative of forward
+        log_det_J = -torch.sum((1 - self.mask) * s, dim=-1)
         return z, log_det_J
 
 

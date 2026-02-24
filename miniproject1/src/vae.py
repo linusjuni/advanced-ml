@@ -4,10 +4,17 @@
 # - https://github.com/jmtomczak/intro_dgm/blob/main/vaes/vae_example.ipynb
 # - https://github.com/kampta/pytorch-distributions/blob/master/gaussian_vae.py
 
+from enum import Enum
+
 import torch
 import torch.nn as nn
 import torch.distributions as td
 from tqdm import tqdm
+
+
+class KLMode(Enum):
+    ANALYTIC = "analytic"
+    MONTE_CARLO = "monte_carlo"
 
 
 class GaussianEncoder(nn.Module):
@@ -67,7 +74,7 @@ class VAE(nn.Module):
     """
     Define a Variational Autoencoder (VAE) model.
     """
-    def __init__(self, prior, decoder, encoder):
+    def __init__(self, prior, decoder, encoder, kl_mode: KLMode):
         """
         Parameters:
         prior: [torch.nn.Module]
@@ -76,24 +83,42 @@ class VAE(nn.Module):
               The decoder distribution over the data space.
         encoder: [torch.nn.Module]
                 The encoder distribution over the latent space.
+        kl_mode: [KLMode]
+           ANALYTIC for Gaussian prior, MONTE_CARLO for MoG/Flow priors.
         """
 
         super(VAE, self).__init__()
         self.prior = prior
         self.decoder = decoder
         self.encoder = encoder
+        self.kl_mode = kl_mode
 
-    def elbo(self, x):
+    def elbo(self, x, kl_mode: KLMode = KLMode.ANALYTIC):
         """
         Compute the ELBO for the given batch of data.
 
         Parameters:
         x: [torch.Tensor]
            A tensor of dimension `(batch_size, feature_dim1, feature_dim2, ...)`
+        kl_mode: [KLMode]
+           ANALYTIC: use closed-form KL (only works for Gaussian prior).
+           MONTE_CARLO: use MC estimate log q(z|x) - log p(z) (works for any prior).
         """
         q = self.encoder(x)
         z = q.rsample()
-        elbo = torch.mean(self.decoder(z).log_prob(x) - td.kl_divergence(q, self.prior()), dim=0)
+
+        if kl_mode == KLMode.ANALYTIC:
+            try:
+                kl = td.kl_divergence(q, self.prior())
+            except NotImplementedError:
+                raise ValueError(
+                    f"Analytic KL is not supported for prior {type(self.prior).__name__}. "
+                    f"Use KLMode.MONTE_CARLO instead."
+                )
+        else:
+            kl = q.log_prob(z) - self.prior().log_prob(z)
+
+        elbo = torch.mean(self.decoder(z).log_prob(x) - kl, dim=0)
         return elbo
 
     def sample(self, n_samples=1):
@@ -115,7 +140,7 @@ class VAE(nn.Module):
         x: [torch.Tensor]
            A tensor of dimension `(batch_size, feature_dim1, feature_dim2)`
         """
-        return -self.elbo(x)
+        return -self.elbo(x, kl_mode=self.kl_mode)
 
 
 def train(model, optimizer, data_loader, epochs, device):
