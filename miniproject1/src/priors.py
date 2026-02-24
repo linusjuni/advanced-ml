@@ -1,0 +1,36 @@
+# Priors for VAE models
+# GaussianPrior from DTU course 02460 (Advanced Machine Learning Spring) by Jes Frellsen, 2024
+
+import torch
+import torch.nn as nn
+import torch.distributions as td
+
+
+class GaussianPrior(nn.Module):
+    def __init__(self, M):
+        """
+        Define a Gaussian prior distribution with zero mean and unit variance.
+
+        Parameters:
+        M: [int]
+           Dimension of the latent space.
+        """
+        super(GaussianPrior, self).__init__()
+        self.M = M
+        self.mean = nn.Parameter(torch.zeros(self.M), requires_grad=False)
+        self.std = nn.Parameter(torch.ones(self.M), requires_grad=False)
+
+    def forward(self):
+        """
+        Return the prior distribution.
+
+        Returns:
+        prior: [torch.distributions.Distribution]
+        """
+        return td.Independent(td.Normal(loc=self.mean, scale=self.std), 1)
+
+
+# TODO: Implement MoGPrior (Mixture of Gaussians prior)
+
+
+# TODO: Implement FlowPrior (Flow-based prior)
