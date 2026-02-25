@@ -143,7 +143,7 @@ class VAE(nn.Module):
         return -self.elbo(x, kl_mode=self.kl_mode)
 
 
-def train(model, optimizer, data_loader, epochs, device):
+def train(model, optimizer, data_loader, epochs, device) -> list[float]:
     """
     Train a VAE model.
 
@@ -158,21 +158,34 @@ def train(model, optimizer, data_loader, epochs, device):
         Number of epochs to train for.
     device: [torch.device]
         The device to use for training.
+
+    Returns:
+    epoch_losses: [list[float]]
+        Average training loss per epoch.
     """
     model.train()
 
     total_steps = len(data_loader)*epochs
     progress_bar = tqdm(range(total_steps), desc="Training")
 
+    epoch_losses = []
     for epoch in range(epochs):
-        data_iter = iter(data_loader)
-        for x in data_iter:
+        epoch_loss = 0.0
+        num_batches = 0
+        for x in data_loader:
             x = x[0].to(device)
             optimizer.zero_grad()
             loss = model(x)
             loss.backward()
             optimizer.step()
 
+            epoch_loss += loss.item()
+            num_batches += 1
+
             # Update progress bar
             progress_bar.set_postfix(loss=f"⠀{loss.item():12.4f}", epoch=f"{epoch+1}/{epochs}")
             progress_bar.update()
+
+        epoch_losses.append(epoch_loss / num_batches)
+
+    return epoch_losses

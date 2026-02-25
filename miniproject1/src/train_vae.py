@@ -1,9 +1,11 @@
 import argparse
+import csv
 
 import torch
 
 from src.dataset import get_binarized_mnist
 from src.vae import train
+from src.utils.logger import get_logger
 from src.utils.model_utils import (
     PriorType,
     VAEGaussianConfig,
@@ -12,6 +14,8 @@ from src.utils.model_utils import (
     _build_vae,
     save_model,
 )
+
+logger = get_logger(__name__)
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,27 +28,41 @@ def parse_args() -> argparse.Namespace:
     shared.add_argument("--epochs", type=int, required=True, help="training epochs")
     shared.add_argument("--batch-size", type=int, required=True, help="batch size")
     shared.add_argument("--lr", type=float, required=True, help="learning rate")
-    shared.add_argument("--device", type=str, required=True, choices=["cpu", "cuda", "mps"], help="torch device")
-    shared.add_argument("--model", type=str, default=None, help="path to save model (default: auto-generated)")
-
+    shared.add_argument(
+        "--device",
+        type=str,
+        required=True,
+        choices=["cpu", "cuda", "mps"],
+        help="torch device",
+    )
     subparsers = parser.add_subparsers(dest="prior", required=True)
 
     # Gaussian prior
     subparsers.add_parser("gaussian", parents=[shared], help="standard Gaussian prior")
 
     # MoG prior
-    mog = subparsers.add_parser("mog", parents=[shared], help="mixture of Gaussians prior")
-    mog.add_argument("--K", type=int, required=True, help="number of mixture components")
+    mog = subparsers.add_parser(
+        "mog", parents=[shared], help="mixture of Gaussians prior"
+    )
+    mog.add_argument(
+        "--K", type=int, required=True, help="number of mixture components"
+    )
 
     # Flow prior
     flow = subparsers.add_parser("flow", parents=[shared], help="flow-based prior")
-    flow.add_argument("--flow-num-layers", type=int, required=True, help="number of flow layers")
-    flow.add_argument("--flow-num-hidden", type=int, required=True, help="hidden units per flow layer")
+    flow.add_argument(
+        "--flow-num-layers", type=int, required=True, help="number of flow layers"
+    )
+    flow.add_argument(
+        "--flow-num-hidden", type=int, required=True, help="hidden units per flow layer"
+    )
 
     return parser.parse_args()
 
 
-def build_config(args: argparse.Namespace) -> VAEGaussianConfig | VAEMoGConfig | VAEFlowConfig:
+def build_config(
+    args: argparse.Namespace,
+) -> VAEGaussianConfig | VAEMoGConfig | VAEFlowConfig:
     prior = PriorType(args.prior)
     match prior:
         case PriorType.GAUSSIAN:
@@ -63,9 +81,9 @@ def build_config(args: argparse.Namespace) -> VAEGaussianConfig | VAEMoGConfig |
 def main():
     args = parse_args()
 
-    print("# Options")
+    logger.info("Training VAE with the following configuration:")
     for key, value in sorted(vars(args).items()):
-        print(f"  {key} = {value}")
+        logger.info(f"  {key} = {value}")
 
     torch.manual_seed(args.seed)
 
@@ -74,14 +92,22 @@ def main():
 
     train_data = get_binarized_mnist(train=True)
     train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=args.batch_size, shuffle=True,
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=True,
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    train(model, optimizer, train_loader, args.epochs, args.device)
+    epoch_losses = train(model, optimizer, train_loader, args.epochs, args.device)
 
-    path = save_model(model, config, path=args.model)
-    print(f"Model saved to {path}")
+    run_dir = save_model(model, config)
+    with open(run_dir / "metrics.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["epoch", "train_loss"])
+        for epoch, loss in enumerate(epoch_losses, 1):
+            writer.writerow([epoch, loss])
+
+    logger.success(f"Run saved to {run_dir}")
 
 
 if __name__ == "__main__":

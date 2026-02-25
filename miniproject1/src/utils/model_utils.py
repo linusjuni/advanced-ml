@@ -73,39 +73,42 @@ ModelConfig = (
 )
 
 
-def _default_filename(config: ModelConfig) -> str:
+def _default_run_name(config: ModelConfig) -> str:
     parts = [config.model_type.value]
     if isinstance(config, VAEBaseConfig):
         parts.append(config.prior.value)
     parts.append(f"seed{config.seed}")
     parts.append(datetime.now().strftime("%Y%m%d_%H%M%S"))
-    return "_".join(parts) + ".pt"
+    return "_".join(parts)
 
 
 def save_model(
-    model: nn.Module, config: ModelConfig, path: str | Path | None = None
+    model: nn.Module, config: ModelConfig, run_dir: str | Path | None = None
 ) -> Path:
     """
-    Save a model's weights and config to disk.
+    Save a model's weights and config to a run directory.
 
     Parameters:
     model: [nn.Module]
         The model to save.
     config: [ModelConfig]
         A dataclass describing the model architecture and hyperparameters.
-    path: [str | Path | None]
-        File path to save to. If None, saves to checkpoints/<model_type>_<prior>_seed<N>_<timestamp>.pt.
+    run_dir: [str | Path | None]
+        Directory to save into. If None, creates checkpoints/<run_name>/.
 
     Returns:
-    path: [Path]
-        The path the model was saved to.
+    run_dir: [Path]
+        The run directory path.
     """
-    if path is None:
-        path = CHECKPOINTS_DIR / _default_filename(config)
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"state_dict": model.state_dict(), "config": asdict(config)}, path)
-    return path
+    if run_dir is None:
+        run_dir = CHECKPOINTS_DIR / _default_run_name(config)
+    run_dir = Path(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {"state_dict": model.state_dict(), "config": asdict(config)},
+        run_dir / "model.pth",
+    )
+    return run_dir
 
 
 def load_model(path: str | Path) -> tuple[nn.Module, ModelConfig]:
@@ -115,7 +118,7 @@ def load_model(path: str | Path) -> tuple[nn.Module, ModelConfig]:
 
     Parameters:
     path: [str | Path]
-        Path to a file saved with save_model().
+        Path to a run directory (containing model.pth) or directly to a .pth file.
 
     Returns:
     model: [nn.Module]
@@ -123,6 +126,9 @@ def load_model(path: str | Path) -> tuple[nn.Module, ModelConfig]:
     config: [ModelConfig]
         The config dataclass that was saved alongside the weights.
     """
+    path = Path(path)
+    if path.is_dir():
+        path = path / "model.pth"
     checkpoint = torch.load(path, map_location="cpu", weights_only=False)
     config_dict = checkpoint["config"]
     model_type = config_dict["model_type"]
