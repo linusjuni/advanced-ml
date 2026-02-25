@@ -92,6 +92,8 @@ def make_run_dir(config: ModelConfig, **training_params: object) -> Path:
     for key, value in asdict(config).items():
         if key == "model_type":
             continue
+        if isinstance(value, Enum):
+            value = value.value
         parts.append(f"{key}{value}")
     for key, value in training_params.items():
         parts.append(f"{key}{value}")
