@@ -27,12 +27,7 @@ class PriorType(str, Enum):
 
 
 @dataclass(kw_only=True)
-class BaseConfig:
-    seed: int
-
-
-@dataclass(kw_only=True)
-class VAEBaseConfig(BaseConfig):
+class VAEBaseConfig:
     M: int
     model_type: ModelType = ModelType.VAE
 
@@ -56,16 +51,21 @@ class VAEFlowConfig(VAEBaseConfig):
 
 
 @dataclass(kw_only=True)
-class DDPMConfig(BaseConfig):
+class DDPMBaseConfig:
     # TODO (Part B)
     model_type: ModelType = ModelType.DDPM
 
 
 @dataclass(kw_only=True)
-class LatentDDPMConfig(BaseConfig):
+class DDPMConfig(DDPMBaseConfig):
     # TODO (Part B)
-    beta: float
-    model_type: ModelType = ModelType.LATENT_DDPM
+    pass
+
+
+@dataclass(kw_only=True)
+class LatentDDPMConfig(DDPMBaseConfig):
+    # TODO (Part B)
+    model_type: ModelType = ModelType.LATENT_DDPM  # override model_type
 
 
 ModelConfig = (
@@ -73,18 +73,32 @@ ModelConfig = (
 )
 
 
-def _default_run_name(config: ModelConfig) -> str:
+def make_run_dir(config: ModelConfig, **training_params: object) -> Path:
+    """
+    Create a run directory name from model config and training params.
+
+    Parameters:
+    config: [ModelConfig]
+        The model architecture config.
+    **training_params:
+        Training hyperparameters (seed, lr, bs, epochs, etc.).
+
+    Returns:
+    run_dir: [Path]
+        The created run directory path.
+    """
     parts = [config.model_type.value]
     if isinstance(config, VAEBaseConfig):
         parts.append(config.prior.value)
-    parts.append(f"seed{config.seed}")
+    for key, value in training_params.items():
+        parts.append(f"{key}{value}")
     parts.append(datetime.now().strftime("%Y%m%d_%H%M%S"))
-    return "_".join(parts)
+    run_dir = CHECKPOINTS_DIR / "_".join(parts)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
 
 
-def save_model(
-    model: nn.Module, config: ModelConfig, run_dir: str | Path | None = None
-) -> Path:
+def save_model(model: nn.Module, config: ModelConfig, run_dir: Path) -> Path:
     """
     Save a model's weights and config to a run directory.
 
@@ -93,17 +107,13 @@ def save_model(
         The model to save.
     config: [ModelConfig]
         A dataclass describing the model architecture and hyperparameters.
-    run_dir: [str | Path | None]
-        Directory to save into. If None, creates checkpoints/<run_name>/.
+    run_dir: [Path]
+        Directory to save into (created by make_run_dir).
 
     Returns:
     run_dir: [Path]
         The run directory path.
     """
-    if run_dir is None:
-        run_dir = CHECKPOINTS_DIR / _default_run_name(config)
-    run_dir = Path(run_dir)
-    run_dir.mkdir(parents=True, exist_ok=True)
     torch.save(
         {"state_dict": model.state_dict(), "config": asdict(config)},
         run_dir / "model.pth",

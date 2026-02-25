@@ -6,7 +6,17 @@ requires-python = ">=3.12"
 dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.4.2",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
     "scipy>=1.17.0",
     "torch>=2.10.0",
     "torchvision>=0.25.0",
+    "tqdm>=4.0.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+extraPaths = ["."]

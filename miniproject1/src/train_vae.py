@@ -12,6 +12,7 @@ from src.utils.model_utils import (
     VAEMoGConfig,
     VAEFlowConfig,
     _build_vae,
+    make_run_dir,
     save_model,
 )
 
@@ -66,12 +67,11 @@ def build_config(
     prior = PriorType(args.prior)
     match prior:
         case PriorType.GAUSSIAN:
-            return VAEGaussianConfig(seed=args.seed, M=args.M)
+            return VAEGaussianConfig(M=args.M)
         case PriorType.MOG:
-            return VAEMoGConfig(seed=args.seed, M=args.M, K=args.K)
+            return VAEMoGConfig(M=args.M, K=args.K)
         case PriorType.FLOW:
             return VAEFlowConfig(
-                seed=args.seed,
                 M=args.M,
                 flow_num_layers=args.flow_num_layers,
                 flow_num_hidden=args.flow_num_hidden,
@@ -100,7 +100,15 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     epoch_losses = train(model, optimizer, train_loader, args.epochs, args.device)
 
-    run_dir = save_model(model, config)
+    run_dir = make_run_dir(
+        config,
+        M=args.M,
+        seed=args.seed,
+        lr=args.lr,
+        bs=args.batch_size,
+        ep=args.epochs,
+    )
+    save_model(model, config, run_dir)
     with open(run_dir / "metrics.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["epoch", "train_loss"])
