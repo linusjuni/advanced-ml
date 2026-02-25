@@ -420,18 +420,24 @@ source = { editable = "miniproject1" }
 dependencies = [
     { name = "matplotlib" },
     { name = "numpy" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
     { name = "scipy" },
     { name = "torch" },
     { name = "torchvision" },
+    { name = "tqdm" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "numpy", specifier = ">=2.4.2" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "scipy", specifier = ">=1.17.0" },
     { name = "torch", specifier = ">=2.10.0" },
     { name = "torchvision", specifier = ">=0.25.0" },
+    { name = "tqdm", specifier = ">=4.0.0" },
 ]
 
 [[package]]
