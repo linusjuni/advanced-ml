@@ -102,7 +102,6 @@ def main():
 
     run_dir = make_run_dir(
         config,
-        M=args.M,
         seed=args.seed,
         lr=args.lr,
         bs=args.batch_size,

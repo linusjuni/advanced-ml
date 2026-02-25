@@ -89,8 +89,10 @@ def make_run_dir(config: ModelConfig, **training_params: object) -> Path:
         The created run directory path.
     """
     parts = [config.model_type.value]
-    if isinstance(config, VAEBaseConfig):
-        parts.append(config.prior.value)
+    for key, value in asdict(config).items():
+        if key == "model_type":
+            continue
+        parts.append(f"{key}{value}")
     for key, value in training_params.items():
         parts.append(f"{key}{value}")
     parts.append(datetime.now().strftime("%Y%m%d_%H%M%S"))
