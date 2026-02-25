@@ -1,3 +1,4 @@
+import csv
 from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
@@ -119,6 +120,23 @@ def save_model(model: nn.Module, config: ModelConfig, run_dir: Path) -> Path:
         run_dir / "model.pth",
     )
     return run_dir
+
+
+def save_metrics(run_dir: Path, epoch_losses: list[float]) -> None:
+    """
+    Save per-epoch training metrics to a CSV file in the run directory.
+
+    Parameters:
+    run_dir: [Path]
+        The run directory (created by make_run_dir).
+    epoch_losses: [list[float]]
+        Average training loss per epoch.
+    """
+    with open(run_dir / "metrics.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["epoch", "train_loss"])
+        for epoch, loss in enumerate(epoch_losses, 1):
+            writer.writerow([epoch, loss])
 
 
 def load_model(path: str | Path) -> tuple[nn.Module, ModelConfig]:
