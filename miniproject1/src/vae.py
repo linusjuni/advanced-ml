@@ -116,7 +116,7 @@ class VAE(nn.Module):
                     f"Use KLMode.MONTE_CARLO instead."
                 )
         else:
-            kl = q.log_prob(z) - self.prior().log_prob(z)
+            kl = q.log_prob(z) - self.prior.log_prob(z)
 
         elbo = torch.mean(self.decoder(z).log_prob(x) - kl, dim=0)
         return elbo
@@ -129,7 +129,7 @@ class VAE(nn.Module):
         n_samples: [int]
            Number of samples to generate.
         """
-        z = self.prior().sample(torch.Size([n_samples]))
+        z = self.prior.sample(torch.Size([n_samples]))
         return self.decoder(z).sample()
 
     def forward(self, x):
