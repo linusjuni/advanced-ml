@@ -59,8 +59,9 @@ class DDPMBaseConfig:
 
 @dataclass(kw_only=True)
 class DDPMConfig(DDPMBaseConfig):
-    # TODO (Part B)
-    pass
+    T: int = 1000
+    beta_1: float = 1e-4
+    beta_T: float = 2e-2
 
 
 @dataclass(kw_only=True)
@@ -257,10 +258,12 @@ def _build_flow_prior(M: int, num_layers: int, num_hidden: int) -> FlowPrior:
         transformations.append(MaskedCouplingLayer(scale_net, translation_net, mask))
     return FlowPrior(Flow(base, transformations))
 
-
 def _build_ddpm(config: DDPMConfig) -> nn.Module:
-    # TODO (Part B)
-    raise NotImplementedError("DDPM loading not yet implemented")
+    from src.unet import Unet
+    from src.ddpm import DDPM
+
+    network = Unet()
+    return DDPM(network, beta_1=config.beta_1, beta_T=config.beta_T, T=config.T)
 
 
 def _build_latent_ddpm(config: LatentDDPMConfig) -> nn.Module:
