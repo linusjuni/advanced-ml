@@ -20,3 +20,9 @@ members = ["miniproject1", "miniproject2", "miniproject3"]
 
 [tool.uv.sources]
 miniproject1 = { workspace = true }
+
+[tool.pyright]
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+extraPaths = ["miniproject1", "miniproject2", "miniproject3"]
