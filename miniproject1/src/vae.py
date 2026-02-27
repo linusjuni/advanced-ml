@@ -70,6 +70,35 @@ class BernoulliDecoder(nn.Module):
         return td.Independent(td.Bernoulli(logits=logits), 2)
 
 
+class GaussianDecoder(nn.Module):
+    def __init__(self, decoder_net, fixed_sigma=0.1):
+        """
+        A Gaussian decoder distribution based on a given decoder network.
+        Used for standard (non-binarized) MNIST with continuous values in [-1, 1].
+
+        Parameters:
+        decoder_net: [torch.nn.Module]
+           The decoder network.
+        fixed_sigma: [float]
+           Fixed standard deviation for the Gaussian distribution.
+        """
+        super(GaussianDecoder, self).__init__()
+        self.decoder_net = decoder_net
+        self.fixed_sigma = fixed_sigma
+
+    def forward(self, z):
+        """
+        Returns a Gaussian distribution over the data space.
+
+        Parameters:
+        z: [torch.Tensor]
+           A tensor of dimension (batch_size, M), where M is the dimension of the latent space.
+        """
+        mean = self.decoder_net(z)
+        # Use fixed variance for all pixels
+        return td.Independent(td.Normal(loc=mean, scale=self.fixed_sigma), 1)
+
+
 class VAE(nn.Module):
     """
     Define a Variational Autoencoder (VAE) model.
