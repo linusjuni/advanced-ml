@@ -74,7 +74,7 @@ class VAE(nn.Module):
     """
     Define a Variational Autoencoder (VAE) model.
     """
-    def __init__(self, prior, decoder, encoder, kl_mode: KLMode):
+    def __init__(self, prior, decoder, encoder, kl_mode: KLMode, beta=1.0):
         """
         Parameters:
         prior: [torch.nn.Module]
@@ -92,6 +92,7 @@ class VAE(nn.Module):
         self.decoder = decoder
         self.encoder = encoder
         self.kl_mode = kl_mode
+        self.beta = beta
 
     def elbo(self, x, kl_mode: KLMode = KLMode.ANALYTIC):
         """
@@ -104,8 +105,7 @@ class VAE(nn.Module):
            ANALYTIC: use closed-form KL (only works for Gaussian prior).
            MONTE_CARLO: use MC estimate log q(z|x) - log p(z) (works for any prior).
         """
-        q = self.encoder(x)
-        z = q.rsample()
+        q, z = self.latent_representation(x)
 
         if kl_mode == KLMode.ANALYTIC:
             try:
@@ -118,8 +118,16 @@ class VAE(nn.Module):
         else:
             kl = q.log_prob(z) - self.prior.log_prob(z)
 
-        elbo = torch.mean(self.decoder(z).log_prob(x) - kl, dim=0)
+        elbo = torch.mean(self.decoder(z).log_prob(x) - self.beta*kl, dim=0)
         return elbo
+    
+    def latent_representation(self, x):
+        q = self.encoder(x)
+        z = q.rsample()
+        return q, z
+    
+    def prediction(self, z):
+        return self.decoder(z).sample()
 
     def sample(self, n_samples=1):
         """
