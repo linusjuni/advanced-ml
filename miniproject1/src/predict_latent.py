@@ -1,6 +1,6 @@
 import csv
 from pathlib import Path
-
+import argparse
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
@@ -8,7 +8,50 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 from utils.model_utils import load_model
-from dataset import get_binarized_mnist
+from dataset import get_binarized_mnist, get_dequantized_mnist
+
+
+def visualize_training_curves(vae_checkpoint_dir: str | Path, ddpm_checkpoint_dir: str | Path):
+    """Plot training loss curves from metrics.csv for both VAE and DDPM"""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    
+    # Plot VAE training curve
+    vae_metrics_path = Path(vae_checkpoint_dir) / "metrics.csv"
+    if vae_metrics_path.exists():
+        epochs, losses = [], []
+        with open(vae_metrics_path, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                epochs.append(int(row['epoch']))
+                losses.append(float(row['train_loss']))
+        
+        ax1.plot(epochs, losses, marker='o', linewidth=2, markersize=4, color='blue')
+        ax1.set_xlabel('Epoch', fontsize=12)
+        ax1.set_ylabel('Training Loss', fontsize=12)
+        ax1.set_title('VAE Training Loss', fontsize=14)
+        ax1.grid(True, alpha=0.3)
+    
+    # Plot DDPM training curve
+    ddpm_metrics_path = Path(ddpm_checkpoint_dir) / "metrics.csv"
+    if ddpm_metrics_path.exists():
+        epochs, losses = [], []
+        with open(ddpm_metrics_path, 'r') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                epochs.append(int(row['epoch']))
+                losses.append(float(row['train_loss']))
+        
+        ax2.plot(epochs, losses, marker='o', linewidth=2, markersize=4, color='red')
+        ax2.set_xlabel('Epoch', fontsize=12)
+        ax2.set_ylabel('Training Loss', fontsize=12)
+        ax2.set_title('Latent DDPM Training Loss', fontsize=14)
+        ax2.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    output_path = Path(ddpm_checkpoint_dir) / 'training_curves.png'
+    plt.savefig(output_path, dpi=150)
+    print(f"Saved training curves to {output_path}")
+    plt.close()
 
 
 def visualize_samples(model, n_samples=64, checkpoint_dir=None, vae=None):
@@ -32,6 +75,9 @@ def visualize_samples(model, n_samples=64, checkpoint_dir=None, vae=None):
     n_rows = int(np.sqrt(n_samples))
     n_cols = n_samples // n_rows
     
+    # Reshape samples to 28x28
+    samples = samples.reshape(-1, 28, 28)
+    
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(12, 12))
     for i, ax in enumerate(axes.flat):
         if i < n_samples:
@@ -48,24 +94,33 @@ def visualize_samples(model, n_samples=64, checkpoint_dir=None, vae=None):
 
 
 if __name__ == "__main__":
-    # Load model
-    checkpoint_dir = "src/checkpoints/vae_M32_priorgaussian_seed1_lr0.001_bs128_ep20_20260227_104346"
-    vae, config = load_model(checkpoint_dir)
+    # Load models
+    parser = argparse.ArgumentParser(description="Predict Latent DDPM on MNIST")
 
-    diffusion_model_dir = "src/checkpoints/latent_ddpm_M32_num_hidden512_T1000_beta_10.0001_beta_T0.02_seed1_lr0.001_bs64_ep100_20260227_124518/model.pth"
-    diffusion_model, config = load_model(diffusion_model_dir)
+    parser.add_argument("--vae-checkpoint", type=str, help="Path to VAE checkpoint directory")
+    parser.add_argument("--ddpm-checkpoint", type=str, help="Path to DDPM checkpoint directory")
+
+    args = parser.parse_args()
+
+    vae_checkpoint_dir = args.vae_checkpoint
+    diffusion_checkpoint_dir = args.ddpm_checkpoint
+    print("Loading VAE...")
+    vae, vae_config = load_model(vae_checkpoint_dir)
+    print(f"Loaded VAE with config: {vae_config}")
     
-    
-    print(f"Loaded model with config: {config}")
-    print(f"Latent dimension: {config.M}")
+    print("\nLoading Latent DDPM...")
+    diffusion_model, ddpm_config = load_model(diffusion_checkpoint_dir)
+    print(f"Loaded DDPM with config: {ddpm_config}")
+    print(f"Latent dimension: {ddpm_config.M}")
     
     # Load test data
-    test_dataset = get_binarized_mnist(train=False)
+    test_dataset = get_dequantized_mnist(train=False)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=True)
     
     print("\nGenerating visualizations...")
     
     # Generate all visualizations
-    visualize_samples(diffusion_model, n_samples=64, checkpoint_dir=checkpoint_dir, vae=vae)
+    visualize_training_curves(vae_checkpoint_dir, diffusion_checkpoint_dir)
+    visualize_samples(diffusion_model, n_samples=64, checkpoint_dir=diffusion_checkpoint_dir, vae=vae)
     
     print("\nAll visualizations complete!")

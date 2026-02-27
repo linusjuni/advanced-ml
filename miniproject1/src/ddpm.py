@@ -195,7 +195,7 @@ def train(model, optimizer, data_loader, epochs, device, use_latent_space=False,
         from utils.model_utils import load_model
         if vae_checkpoint is None:
             vae_checkpoint = "src/checkpoints/vae_M32_priorgaussian_seed1_lr0.001_bs128_ep20_20260227_104346"
-        vae, config = load_model(vae_checkpoint)
+        vae, config = load_model(vae_checkpoint + "/model.pth")
         vae = vae.to(device)
         for p in vae.parameters():
             p.requires_grad = False
