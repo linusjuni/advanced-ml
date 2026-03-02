@@ -3,7 +3,6 @@ from torchvision import datasets, transforms
 
 from src.utils.settings import settings
 
-
 def get_binarized_mnist(train: bool = True) -> Dataset:
     """Binarized MNIST dataset (pixels > 0.5 become 1, else 0). For Part A."""
     return datasets.MNIST(
@@ -30,5 +29,5 @@ def get_dequantized_mnist(train: bool = True) -> Dataset:
                 transforms.ToTensor(),
                 transforms.Lambda(lambda x: (x * 2 - 1).view(-1)),
             ]
-        ),
+        )
     )

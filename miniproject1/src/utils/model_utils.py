@@ -7,10 +7,9 @@ from datetime import datetime
 import torch
 import torch.nn as nn
 
-from src.vae import VAE, GaussianEncoder, BernoulliDecoder, KLMode
+from src.vae import VAE, GaussianEncoder, BernoulliDecoder, GaussianDecoder, KLMode
 from src.priors import GaussianPrior, MoGPrior, FlowPrior
 from src.flow import Flow, GaussianBase, MaskedCouplingLayer
-
 
 CHECKPOINTS_DIR = Path(__file__).parent.parent / "checkpoints"
 
@@ -27,9 +26,16 @@ class PriorType(str, Enum):
     FLOW = "flow"
 
 
+class DecoderType(str, Enum):
+    BERNOULLI = "bernoulli"  # For binary MNIST (Part A)
+    GAUSSIAN = "gaussian"    # For standard MNIST (Part B)
+
+
 @dataclass(kw_only=True)
 class VAEBaseConfig:
     M: int
+    decoder_type: DecoderType = DecoderType.BERNOULLI
+    beta: float = 1.0  # β parameter for β-VAE
     model_type: ModelType = ModelType.VAE
 
 
@@ -66,8 +72,12 @@ class DDPMConfig(DDPMBaseConfig):
 
 @dataclass(kw_only=True)
 class LatentDDPMConfig(DDPMBaseConfig):
-    # TODO (Part B)
-    model_type: ModelType = ModelType.LATENT_DDPM  # override model_type
+    M: int  # Latent dimension from VAE
+    num_hidden: int = 512  # Hidden units for FcNetwork
+    T: int = 1000
+    beta_1: float = 1e-4
+    beta_T: float = 2e-2
+    model_type: ModelType = ModelType.LATENT_DDPM
 
 
 ModelConfig = (
@@ -229,8 +239,25 @@ def _build_vae(config: VAEGaussianConfig | VAEMoGConfig | VAEFlowConfig) -> nn.M
         kl_mode = KLMode.MONTE_CARLO
 
     encoder = GaussianEncoder(encoder_net)
-    decoder = BernoulliDecoder(decoder_net)
-    return VAE(prior, decoder, encoder, kl_mode)
+    
+    # Choose decoder based on config
+    if hasattr(config, 'decoder_type') and config.decoder_type == DecoderType.GAUSSIAN:
+        # For Part B: Gaussian decoder for standard MNIST (continuous values)
+        # Need to remove Unflatten layer for Gaussian decoder (expects flat output)
+        decoder_net_gaussian = nn.Sequential(
+            nn.Linear(M, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 784),
+        )
+        decoder = GaussianDecoder(decoder_net_gaussian, fixed_sigma=0.1)
+    else:
+        # For Part A: Bernoulli decoder for binary MNIST
+        decoder = BernoulliDecoder(decoder_net)
+    
+    beta = config.beta if hasattr(config, 'beta') else 1.0
+    return VAE(prior, decoder, encoder, kl_mode, beta=beta)
 
 
 def _build_flow_prior(M: int, num_layers: int, num_hidden: int) -> FlowPrior:
@@ -265,7 +292,10 @@ def _build_ddpm(config: DDPMConfig) -> nn.Module:
     network = Unet()
     return DDPM(network, beta_1=config.beta_1, beta_T=config.beta_T, T=config.T)
 
-
 def _build_latent_ddpm(config: LatentDDPMConfig) -> nn.Module:
-    # TODO (Part B)
-    raise NotImplementedError("Latent DDPM loading not yet implemented")
+    from src.ddpm import DDPM, FcNetwork
+
+    # For latent DDPM, use FcNetwork that operates on latent vectors
+    # instead of UNet which expects 28x28 images
+    network = FcNetwork(input_dim=config.M, num_hidden=config.num_hidden)
+    return DDPM(network, beta_1=config.beta_1, beta_T=config.beta_T, T=config.T)

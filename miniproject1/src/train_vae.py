@@ -2,11 +2,12 @@ import argparse
 
 import torch
 
-from src.dataset import get_binarized_mnist
+from src.dataset import get_binarized_mnist, get_dequantized_mnist
 from src.vae import train
 from src.utils.logger import get_logger
 from src.utils.model_utils import (
     PriorType,
+    DecoderType,
     VAEGaussianConfig,
     VAEMoGConfig,
     VAEFlowConfig,
@@ -29,6 +30,14 @@ def parse_args() -> argparse.Namespace:
     shared.add_argument("--epochs", type=int, required=True, help="training epochs")
     shared.add_argument("--batch-size", type=int, required=True, help="batch size")
     shared.add_argument("--lr", type=float, required=True, help="learning rate")
+    shared.add_argument("--beta", type=float, default=1.0, help="beta parameter for beta-VAE (default: 1.0)")
+    shared.add_argument(
+        "--decoder-type",
+        type=str,
+        default="bernoulli",
+        choices=["bernoulli", "gaussian"],
+        help="decoder type: bernoulli for binary MNIST (Part A), gaussian for standard MNIST (Part B)"
+    )
     shared.add_argument(
         "--device",
         type=str,
@@ -65,16 +74,21 @@ def build_config(
     args: argparse.Namespace,
 ) -> VAEGaussianConfig | VAEMoGConfig | VAEFlowConfig:
     prior = PriorType(args.prior)
+    decoder_type = DecoderType(args.decoder_type)
+    beta = args.beta
+    
     match prior:
         case PriorType.GAUSSIAN:
-            return VAEGaussianConfig(M=args.M)
+            return VAEGaussianConfig(M=args.M, decoder_type=decoder_type, beta=beta)
         case PriorType.MOG:
-            return VAEMoGConfig(M=args.M, K=args.K)
+            return VAEMoGConfig(M=args.M, K=args.K, decoder_type=decoder_type, beta=beta)
         case PriorType.FLOW:
             return VAEFlowConfig(
                 M=args.M,
                 flow_num_layers=args.flow_num_layers,
                 flow_num_hidden=args.flow_num_hidden,
+                decoder_type=decoder_type,
+                beta=beta,
             )
 
 
@@ -90,7 +104,14 @@ def main():
     config = build_config(args)
     model = _build_vae(config).to(args.device)
 
-    train_data = get_binarized_mnist(train=True)
+    # Choose dataset based on decoder type
+    if config.decoder_type == DecoderType.GAUSSIAN:
+        # Part B: Standard MNIST with Gaussian decoder
+        train_data = get_dequantized_mnist(train=True)
+    else:
+        # Part A: Binary MNIST with Bernoulli decoder
+        train_data = get_binarized_mnist(train=True)
+    
     train_loader = torch.utils.data.DataLoader(
         train_data,
         batch_size=args.batch_size,

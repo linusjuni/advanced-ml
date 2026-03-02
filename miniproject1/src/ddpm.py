@@ -5,7 +5,6 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-
 class DDPM(nn.Module):
     def __init__(self, network, beta_1=1e-4, beta_T=2e-2, T=100):
         """
@@ -66,17 +65,28 @@ class DDPM(nn.Module):
 
         return neg_elbo
 
-    def sample(self, shape):
+    def sample(self, n_samples=1):
         """
         Sample from the model.
 
         Parameters:
-        shape: [tuple]
-            The shape of the samples to generate.
+        n_samples: [int or tuple]
+            If int: number of samples to generate (feature dim inferred from network).
+            If tuple: full shape of samples to generate.
         Returns:
         [torch.Tensor]
             The generated samples.
         """
+        # Infer feature dimension from network
+        if isinstance(n_samples, int):
+            if hasattr(self.network, 'network'):  # FcNetwork
+                feature_dim = self.network.network[-1].out_features
+            else: 
+                feature_dim = 784
+            shape = (n_samples, feature_dim)
+        else:
+            shape = n_samples
+        
         # Sample x_t for t=T (i.e., Gaussian noise)
         x_t = torch.randn(shape).to(self.alpha.device)
 
@@ -151,7 +161,7 @@ class FcNetwork(nn.Module):
         return self.network(x_t_cat)
 
 
-def train(model, optimizer, data_loader, epochs, device) -> list[float]:
+def train(model, optimizer, data_loader, epochs, device, use_latent_space=False, vae_checkpoint=None):
     """
     Train a DDPM model.
 
@@ -166,7 +176,11 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
         Number of epochs to train for.
     device: [torch.device]
         The device to use for training.
-
+    use_latent_space: [bool]
+        Whether to train in the latent space of a VAE (latent diffusion).
+    vae_checkpoint: [str]
+        Path to the VAE checkpoint if use_latent_space=True.
+    
     Returns:
     epoch_losses: [list[float]]
         Average training loss per epoch.
@@ -176,14 +190,29 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
     total_steps = len(data_loader) * epochs
     progress_bar = tqdm(range(total_steps), desc="Training")
 
+    vae = None
+    if use_latent_space:
+        from utils.model_utils import load_model
+        if vae_checkpoint is None:
+            vae_checkpoint = "src/checkpoints/vae_M32_priorgaussian_seed1_lr0.001_bs128_ep20_20260227_104346"
+        vae, config = load_model(vae_checkpoint + "/model.pth")
+        vae = vae.to(device)
+        for p in vae.parameters():
+            p.requires_grad = False
+        vae.eval()
+
     epoch_losses = []
     for epoch in range(epochs):
         epoch_loss = 0.0
         num_batches = 0
-        for x in data_loader:
+        data_iter = iter(data_loader)
+        for x in data_iter:
             if isinstance(x, (list, tuple)):
                 x = x[0]
             x = x.to(device)
+            if use_latent_space:
+                with torch.no_grad():
+                    q, x = vae.latent_representation(x)
             optimizer.zero_grad()
             loss = model.loss(x)
             loss.backward()
@@ -197,7 +226,7 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
                 loss=f"{loss.item():12.4f}", epoch=f"{epoch + 1}/{epochs}"
             )
             progress_bar.update()
-
+        
         epoch_losses.append(epoch_loss / num_batches)
-
+    
     return epoch_losses
