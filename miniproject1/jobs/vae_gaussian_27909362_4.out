@@ -1,0 +1,73 @@
+[[97mINFO[0m] [[96m__main__[0m] Training VAE with the following configuration:
+[[97mINFO[0m] [[96m__main__[0m]   M = 64
+[[97mINFO[0m] [[96m__main__[0m]   batch_size = 128
+[[97mINFO[0m] [[96m__main__[0m]   device = cuda
+[[97mINFO[0m] [[96m__main__[0m]   epochs = 20
+[[97mINFO[0m] [[96m__main__[0m]   lr = 0.001
+[[97mINFO[0m] [[96m__main__[0m]   prior = gaussian
+[[97mINFO[0m] [[96m__main__[0m]   seed = 1
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 27909362[4]: <vae_gaussian[1-4]> in cluster <dcc> Exited
+
+Job <vae_gaussian[1-4]> was submitted from host <n-62-12-19> by user <s225224> in cluster <dcc> at Wed Feb 25 17:16:36 2026
+Job was executed on host(s) <n-62-11-14>, in queue <gpuv100>, as user <s225224> in cluster <dcc> at Wed Feb 25 17:16:38 2026
+</zhome/77/2/187952> was used as the home directory.
+</zhome/77/2/187952/projects/advanced-ml/miniproject1> was used as the working directory.
+Started at Wed Feb 25 17:16:38 2026
+Terminated at Wed Feb 25 17:17:38 2026
+Results reported at Wed Feb 25 17:17:38 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -q gpuv100
+#BSUB -W 4:00
+#BSUB -J "vae_gaussian[1-4]"
+#BSUB -o jobs/vae_gaussian_%J_%I.out
+#BSUB -e jobs/vae_gaussian_%J_%I.err
+#BSUB -n 1
+#BSUB -R "rusage[mem=8GB]"
+#BSUB -gpu "num=1:mode=exclusive_process"
+
+MS=(2 10 32 64)
+M=${MS[$((LSB_JOBINDEX - 1))]}
+
+uv sync
+uv run python -m src.train_vae gaussian \
+    --seed 1 \
+    --M $M \
+    --epochs 20 \
+    --batch-size 128 \
+    --lr 1e-3 \
+    --device cuda
+
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 130.
+
+Resource usage summary:
+
+    CPU time :                                   52.00 sec.
+    Max Memory :                                 840 MB
+    Average Memory :                             685.33 MB
+    Total Requested Memory :                     8192.00 MB
+    Delta Memory :                               7352.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                16
+    Run time :                                   94 sec.
+    Turnaround time :                            62 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <jobs/vae_gaussian_27909362_4.err> for stderr output of this job.
+

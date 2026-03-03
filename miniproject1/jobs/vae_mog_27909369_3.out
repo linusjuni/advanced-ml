@@ -1,0 +1,76 @@
+[[97mINFO[0m] [[96m__main__[0m] Training VAE with the following configuration:
+[[97mINFO[0m] [[96m__main__[0m]   K = 10
+[[97mINFO[0m] [[96m__main__[0m]   M = 32
+[[97mINFO[0m] [[96m__main__[0m]   batch_size = 128
+[[97mINFO[0m] [[96m__main__[0m]   device = cuda
+[[97mINFO[0m] [[96m__main__[0m]   epochs = 20
+[[97mINFO[0m] [[96m__main__[0m]   lr = 0.001
+[[97mINFO[0m] [[96m__main__[0m]   prior = mog
+[[97mINFO[0m] [[96m__main__[0m]   seed = 1
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Run saved to /zhome/77/2/187952/projects/advanced-ml/miniproject1/src/checkpoints/vae_M32_K10_priormog_seed1_lr0.001_bs128_ep20_20260225_172309[0m
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 27909369[3]: <vae_mog[1-4]> in cluster <dcc> Done
+
+Job <vae_mog[1-4]> was submitted from host <n-62-12-19> by user <s225224> in cluster <dcc> at Wed Feb 25 17:18:11 2026
+Job was executed on host(s) <4*n-62-20-5>, in queue <gpuv100>, as user <s225224> in cluster <dcc> at Wed Feb 25 17:20:33 2026
+</zhome/77/2/187952> was used as the home directory.
+</zhome/77/2/187952/projects/advanced-ml/miniproject1> was used as the working directory.
+Started at Wed Feb 25 17:20:33 2026
+Terminated at Wed Feb 25 17:23:10 2026
+Results reported at Wed Feb 25 17:23:10 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -q gpuv100
+#BSUB -W 4:00
+#BSUB -J "vae_mog[1-4]"
+#BSUB -o jobs/vae_mog_%J_%I.out
+#BSUB -e jobs/vae_mog_%J_%I.err
+#BSUB -n 4
+#BSUB -R "rusage[mem=8GB]"
+#BSUB -R "span[hosts=1]"
+#BSUB -gpu "num=1:mode=exclusive_process"
+
+MS=(2 10 32 64)
+M=${MS[$((LSB_JOBINDEX - 1))]}
+
+uv sync
+uv run python -m src.train_vae mog \
+    --seed 1 \
+    --M $M \
+    --epochs 20 \
+    --batch-size 128 \
+    --lr 1e-3 \
+    --device cuda \
+    --K 10
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   155.00 sec.
+    Max Memory :                                 936 MB
+    Average Memory :                             936.00 MB
+    Total Requested Memory :                     32768.00 MB
+    Delta Memory :                               31832.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                13
+    Run time :                                   158 sec.
+    Turnaround time :                            299 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <jobs/vae_mog_27909369_3.err> for stderr output of this job.
+
