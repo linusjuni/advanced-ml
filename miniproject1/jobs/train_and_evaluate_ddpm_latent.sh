@@ -11,7 +11,7 @@
 uv sync
 
 # Beta values to sweep
-BETAS=(1e-6 1e-3 1 10 100)
+BETAS=(1e-6 1e-3 1 10)
 
 for BETA in "${BETAS[@]}"; do
     echo "Running pipeline with beta=$BETA"
@@ -63,7 +63,7 @@ for BETA in "${BETAS[@]}"; do
 
     # Evaluate and visualize results
     echo "Evaluating and visualizing results for beta=$BETA..."
-    uv run python -m src.evaluate_ddpm --vae-checkpoint "$VAE_CHECKPOINT" --ddpm-checkpoint "$LATENT_CHECKPOINT"
+    uv run python -m src.evaluate_ddpm --vae-checkpoint "$VAE_CHECKPOINT" --ddpm-checkpoint "$LATENT_CHECKPOINT" --beta "$BETA"
     echo "Evaluation and visualization complete for beta=$BETA!"
 done
 
