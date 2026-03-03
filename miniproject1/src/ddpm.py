@@ -126,42 +126,14 @@ class DDPM(nn.Module):
         """
         return self.negative_elbo(x).mean()
 
-
-class FcNetwork(nn.Module):
-    def __init__(self, input_dim, num_hidden):
-        """
-        Initialize a fully connected network for the DDPM, where the forward function also takes time as an argument.
-
-        Parameters:
-        input_dim: [int]
-            The dimension of the input data.
-        num_hidden: [int]
-            The number of hidden units in the network.
-        """
-        super(FcNetwork, self).__init__()
-        self.network = nn.Sequential(
-            nn.Linear(input_dim + 1, num_hidden),
-            nn.ReLU(),
-            nn.Linear(num_hidden, num_hidden),
-            nn.ReLU(),
-            nn.Linear(num_hidden, input_dim),
-        )
-
-    def forward(self, x, t):
-        """
-        Forward function for the network.
-
-        Parameters:
-        x: [torch.Tensor]
-            The input data of dimension `(batch_size, input_dim)`
-        t: [torch.Tensor]
-            The time steps of dimension `(batch_size, 1)`
-        """
-        x_t_cat = torch.cat([x, t], dim=1)
-        return self.network(x_t_cat)
-
-
-def train(model, optimizer, data_loader, epochs, device, use_latent_space=False, vae_checkpoint=None):
+def train(
+    model,
+    optimizer,
+    data_loader,
+    epochs,
+    device,
+    grad_clip_norm: float | None = None,
+):
     """
     Train a DDPM model.
 
@@ -190,17 +162,6 @@ def train(model, optimizer, data_loader, epochs, device, use_latent_space=False,
     total_steps = len(data_loader) * epochs
     progress_bar = tqdm(range(total_steps), desc="Training")
 
-    vae = None
-    if use_latent_space:
-        from utils.model_utils import load_model
-        if vae_checkpoint is None:
-            vae_checkpoint = "src/checkpoints/vae_M32_priorgaussian_seed1_lr0.001_bs128_ep20_20260227_104346"
-        vae, config = load_model(vae_checkpoint + "/model.pth")
-        vae = vae.to(device)
-        for p in vae.parameters():
-            p.requires_grad = False
-        vae.eval()
-
     epoch_losses = []
     for epoch in range(epochs):
         epoch_loss = 0.0
@@ -210,12 +171,11 @@ def train(model, optimizer, data_loader, epochs, device, use_latent_space=False,
             if isinstance(x, (list, tuple)):
                 x = x[0]
             x = x.to(device)
-            if use_latent_space:
-                with torch.no_grad():
-                    q, x = vae.latent_representation(x)
             optimizer.zero_grad()
             loss = model.loss(x)
             loss.backward()
+            if grad_clip_norm is not None:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip_norm)
             optimizer.step()
 
             epoch_loss += loss.item()
