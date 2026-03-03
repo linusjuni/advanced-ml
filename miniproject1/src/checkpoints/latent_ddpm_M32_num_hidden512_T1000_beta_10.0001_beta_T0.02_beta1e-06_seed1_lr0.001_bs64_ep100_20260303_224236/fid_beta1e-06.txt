@@ -1,0 +1,4 @@
+beta=1e-06
+FID (Latent DDPM): 61.35
+Sampling time: 1.2376 seconds
+Sampling speed: 8080.16 samples/sec
