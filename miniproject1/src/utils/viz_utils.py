@@ -1,12 +1,18 @@
 import csv
 from pathlib import Path
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 import torch
 
 sns.set_theme(style="whitegrid", palette="muted")
+
+# Greys truncated to [white → dark grey], avoiding pure black at peak density
+_GREYS_DARK = mcolors.LinearSegmentedColormap.from_list(
+    "Greys_truncated", plt.get_cmap("Greys")(np.linspace(0.0, 0.75, 256))
+)
 
 
 def plot_training_curves(
@@ -36,7 +42,7 @@ def plot_training_curves(
     plt.tight_layout()
 
     if save_path:
-        fig.savefig(save_path, dpi=150)
+        fig.savefig(save_path, dpi=600)
     plt.close(fig)
     return fig
 
@@ -67,7 +73,7 @@ def plot_sample_grid(
     plt.tight_layout()
 
     if save_path:
-        fig.savefig(save_path, dpi=150)
+        fig.savefig(save_path, dpi=600)
     plt.close(fig)
     return fig
 
@@ -156,17 +162,17 @@ def plot_prior_and_aggregate_posterior(
     xlim = (all_pts[:, 0].min() - x_margin, all_pts[:, 0].max() + x_margin)
     ylim = (all_pts[:, 1].min() - y_margin, all_pts[:, 1].max() + y_margin)
 
-    # Subsample for legibility: at most n_plot points per class / for prior
+    # Subsample posterior for legibility: at most n_plot points per class
     rng = np.random.default_rng(0)
     n_plot = 300
 
-    prior_idx = rng.choice(len(z_prior_2d), size=min(n_plot * 10, len(z_prior_2d)), replace=False)
-
     fig, ax = plt.subplots(figsize=(7, 6))
 
-    # Prior (drawn first so posterior sits on top)
-    ax.scatter(z_prior_2d[prior_idx, 0], z_prior_2d[prior_idx, 1],
-               alpha=0.25, s=10, color="gray", label="prior p(z)")
+    # Prior: filled KDE as background — darker grey = higher density
+    sns.kdeplot(
+        x=z_prior_2d[:, 0], y=z_prior_2d[:, 1],
+        ax=ax, fill=True, cmap=_GREYS_DARK, levels=8, label="prior p(z)",
+    )
 
     # Posterior coloured by digit class
     palette = sns.color_palette("muted", 10)
@@ -188,6 +194,6 @@ def plot_prior_and_aggregate_posterior(
     plt.tight_layout()
 
     if save_path:
-        fig.savefig(save_path, dpi=150)
+        fig.savefig(save_path, dpi=600)
     plt.close(fig)
     return fig
