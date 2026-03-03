@@ -1,15 +1,3 @@
-"""
-evaluate_vae.py — Part A: evaluate trained VAE models.
-
-Outputs (saved to src/results/part_a/):
-  test_elbo.csv          mean/std test ELBO per prior over all seeds
-  samples_<prior>.png    8×8 sample grid from the seed-1 model
-  posterior_<prior>.png  prior vs aggregate posterior scatter (PCA, overlaid)
-
-Usage:
-  python -m src.evaluate_vae [--device cuda] [--batch-size 256]
-"""
-
 import argparse
 import csv
 import re
@@ -19,8 +7,12 @@ import numpy as np
 import torch
 
 from src.dataset import get_binarized_mnist
+from src.utils.logger import get_logger
 from src.utils.model_utils import CHECKPOINTS_DIR, load_model
 from src.utils.viz_utils import plot_prior_and_aggregate_posterior, plot_sample_grid
+from src.vae import VAE
+
+logger = get_logger(__name__)
 
 RESULTS_DIR = Path(__file__).parent / "results" / "part_a"
 
@@ -68,10 +60,10 @@ def main() -> None:
     for prior_name, pattern in PRIOR_PATTERNS.items():
         checkpoints = sorted(CHECKPOINTS_DIR.glob(pattern), key=_get_seed)
         if not checkpoints:
-            print(f"[WARN] No checkpoints found for prior={prior_name}")
+            logger.warning(f"No checkpoints found for prior={prior_name}")
             continue
 
-        print(f"\n=== {prior_name.upper()} prior ({len(checkpoints)} seeds) ===")
+        logger.info(f"{prior_name.upper()} prior ({len(checkpoints)} seeds)")
         elbos: list[float] = []
         seed1_model = None
 
@@ -80,20 +72,21 @@ def main() -> None:
             model, _ = load_model(ckpt_dir)
             elbo = compute_test_elbo(model, test_loader, args.device)
             elbos.append(elbo)
-            print(f"  seed={seed:2d}  test ELBO = {elbo:.4f}")
+            logger.info(f"seed={seed:2d}  test ELBO = {elbo:.4f}")
             if seed == 1:
                 seed1_model = model
 
         mean_elbo = float(np.mean(elbos))
         std_elbo = float(np.std(elbos))
-        print(f"  → mean = {mean_elbo:.4f},  std = {std_elbo:.4f}")
+        logger.info(f"mean = {mean_elbo:.4f},  std = {std_elbo:.4f}")
         summary.append((prior_name, len(elbos), mean_elbo, std_elbo))
 
         if seed1_model is None:
-            print(f"  [WARN] seed=1 checkpoint not found for {prior_name} — skipping plots")
+            logger.warning(f"seed=1 checkpoint not found for {prior_name} — skipping plots")
             continue
 
         # Sample grid
+        assert isinstance(seed1_model, VAE)
         seed1_model.eval().to(args.device)
         with torch.no_grad():
             samples = seed1_model.sample(64).cpu().numpy()
@@ -121,12 +114,11 @@ def main() -> None:
             writer.writerow([row[0], row[1], f"{row[2]:.4f}", f"{row[3]:.4f}"])
 
     # Summary table
-    print("\n" + "=" * 48)
-    print(f"{'Prior':<12} {'Seeds':>5} {'Mean ELBO':>12} {'Std':>8}")
-    print("-" * 48)
+    logger.info("Summary of test ELBO results:")
+    logger.info(f"{'Prior':<12} {'Seeds':>5} {'Mean ELBO':>12} {'Std':>8}")
     for prior_name, n, mean, std in summary:
-        print(f"{prior_name:<12} {n:>5} {mean:>12.4f} {std:>8.4f}")
-    print(f"\nResults saved to {RESULTS_DIR}")
+        logger.info(f"{prior_name:<12} {n:>5} {mean:>12.4f} {std:>8.4f}")
+    logger.success(f"Results saved to {RESULTS_DIR}")
 
 
 if __name__ == "__main__":

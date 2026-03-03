@@ -3,7 +3,10 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
+
+sns.set_theme(style="whitegrid", palette="muted")
 
 
 def plot_training_curves(
@@ -30,7 +33,6 @@ def plot_training_curves(
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Training Loss (negative ELBO)")
     ax.legend()
-    ax.grid(True, alpha=0.3)
     plt.tight_layout()
 
     if save_path:
@@ -161,17 +163,16 @@ def plot_prior_and_aggregate_posterior(
                alpha=0.12, s=4, color="gray", label="prior p(z)")
 
     # Posterior coloured by digit class
-    cmap = plt.get_cmap("tab10")
+    palette = sns.color_palette("muted", 10)
     for digit in range(10):
         mask = labels == digit
         ax.scatter(z_post_2d[mask, 0], z_post_2d[mask, 1],
-                   alpha=0.3, s=4, color=cmap(digit), label=str(digit))
+                   alpha=0.3, s=4, color=palette[digit], label=str(digit))
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    ax.grid(True, alpha=0.3)
     ax.legend(markerscale=3, fontsize=8, ncol=6, loc="upper right",
               title="digit / prior", title_fontsize=8)
 
