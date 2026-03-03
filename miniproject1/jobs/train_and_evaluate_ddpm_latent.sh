@@ -50,5 +50,5 @@ LATENT_CHECKPOINT=$(echo "$LATENT_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g' | grep -oP
 
 # Evaluate and visualize results
 echo "Evaluating and visualizing results..."
-uv run python -m src.predict_latent --vae-checkpoint "$VAE_CHECKPOINT" --ddpm-checkpoint "$LATENT_CHECKPOINT" 
+uv run python -m src.evaluate_ddpm --vae-checkpoint "$VAE_CHECKPOINT" --ddpm-checkpoint "$LATENT_CHECKPOINT" 
 echo "Evaluation and visualization complete!"
