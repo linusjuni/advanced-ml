@@ -156,18 +156,25 @@ def plot_prior_and_aggregate_posterior(
     xlim = (all_pts[:, 0].min() - x_margin, all_pts[:, 0].max() + x_margin)
     ylim = (all_pts[:, 1].min() - y_margin, all_pts[:, 1].max() + y_margin)
 
+    # Subsample for legibility: at most n_plot points per class / for prior
+    rng = np.random.default_rng(0)
+    n_plot = 300
+
+    prior_idx = rng.choice(len(z_prior_2d), size=min(n_plot * 10, len(z_prior_2d)), replace=False)
+
     fig, ax = plt.subplots(figsize=(7, 6))
 
     # Prior (drawn first so posterior sits on top)
-    ax.scatter(z_prior_2d[:, 0], z_prior_2d[:, 1],
-               alpha=0.12, s=4, color="gray", label="prior p(z)")
+    ax.scatter(z_prior_2d[prior_idx, 0], z_prior_2d[prior_idx, 1],
+               alpha=0.25, s=10, color="gray", label="prior p(z)")
 
     # Posterior coloured by digit class
     palette = sns.color_palette("muted", 10)
     for digit in range(10):
-        mask = labels == digit
-        ax.scatter(z_post_2d[mask, 0], z_post_2d[mask, 1],
-                   alpha=0.3, s=4, color=palette[digit], label=str(digit))
+        mask = np.where(labels == digit)[0]
+        idx = rng.choice(mask, size=min(n_plot, len(mask)), replace=False)
+        ax.scatter(z_post_2d[idx, 0], z_post_2d[idx, 1],
+                   alpha=0.6, s=12, color=palette[digit], label=str(digit))
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
