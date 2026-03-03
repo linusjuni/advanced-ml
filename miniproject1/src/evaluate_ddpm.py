@@ -30,10 +30,16 @@ if __name__ == "__main__":
     assert isinstance(diffusion_model, DDPM)
     logger.info(f"Loaded DDPM with config: {ddpm_config}")
 
-    # Training curves
+    # Training curves (separate plots)
     plot_training_curves(
-        [f"{vae_checkpoint_dir}/metrics.csv", f"{diffusion_checkpoint_dir}/metrics.csv"],
-        labels=["VAE", "Latent DDPM"],
+        [f"{vae_checkpoint_dir}/metrics.csv"],
+        labels=["VAE"],
+        save_path=f"{vae_checkpoint_dir}/training_curves.png",
+    )
+
+    plot_training_curves(
+        [f"{diffusion_checkpoint_dir}/metrics.csv"],
+        labels=["Latent DDPM"],
         save_path=f"{diffusion_checkpoint_dir}/training_curves.png",
     )
 
@@ -43,6 +49,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         latent_samples = diffusion_model.sample(64)
         samples = vae.decoder(latent_samples).sample().cpu().numpy()
+        samples = ((samples + 1.0) / 2.0).clip(0.0, 1.0)
 
     plot_sample_grid(
         samples,

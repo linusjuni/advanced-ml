@@ -119,7 +119,11 @@ def main():
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-      = train(model, optimizer, train_loader, args.epochs, args.device)
+    epoch_losses, best_state_dict, best_epoch, best_elbo = train(
+        model, optimizer, train_loader, args.epochs, args.device
+    )
+    model.load_state_dict(best_state_dict)
+    logger.info(f"Saving best VAE checkpoint from epoch {best_epoch} (ELBO={best_elbo:.4f})")
 
     run_dir = make_run_dir(
         config,

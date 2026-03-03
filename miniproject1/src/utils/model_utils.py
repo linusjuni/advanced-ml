@@ -251,7 +251,7 @@ def _build_vae(config: VAEGaussianConfig | VAEMoGConfig | VAEFlowConfig) -> nn.M
             nn.ReLU(),
             nn.Linear(512, 784),
         )
-        decoder = GaussianDecoder(decoder_net_gaussian, fixed_sigma=0.1)
+        decoder = GaussianDecoder(decoder_net_gaussian)
     else:
         # For Part A: Bernoulli decoder for binary MNIST
         decoder = BernoulliDecoder(decoder_net)
@@ -294,7 +294,8 @@ def _build_ddpm(config: DDPMConfig) -> nn.Module:
     return DDPM(network, beta_1=config.beta_1, beta_T=config.beta_T, T=config.T)
 
 def _build_latent_ddpm(config: LatentDDPMConfig) -> nn.Module:
-    from src.ddpm import DDPM, FcNetwork
+    from src.ddpm import DDPM
+    from src.fc_network import FcNetwork
 
     # For latent DDPM, use FcNetwork that operates on latent vectors
     # instead of UNet which expects 28x28 images

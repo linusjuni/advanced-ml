@@ -1,6 +1,7 @@
 # Train β-VAE + latent DDPM on standard MNIST (Part B)
 import argparse
-
+from pathlib import Path
+from src.utils.model_utils import load_model    
 import torch
 
 from src.dataset import get_dequantized_mnist
@@ -19,12 +20,12 @@ logger = get_logger(__name__)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train Latent DDPM with U-Net on MNIST")
+    parser.add_argument("--beta", type=float, default=1.0, help="beta parameter for latent DDPM loss (default: 1.0)")
     parser.add_argument("--seed", type=int, required=True, help="random seed")
     parser.add_argument("--epochs", type=int, required=True, help="training epochs")
     parser.add_argument("--batch-size", type=int, required=True, help="batch size")
     parser.add_argument("--lr", type=float, required=True, help="learning rate")
     parser.add_argument("--T", type=int, default=1000, help="number of diffusion steps")
-    parser.add_argument("--use-latent-space", type=bool, default=False, help="train in VAE latent space (latent diffusion)")
     parser.add_argument(
         "--device",
         type=str,
@@ -56,19 +57,42 @@ def main():
         shuffle=True,
     )
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    vae, _ = load_model(args.pretrained_vae_checkpoint)
+    vae = vae.to(args.device)
+    vae.eval()
+
+    latents = []
+    with torch.no_grad():
+        for x in train_loader:
+            if isinstance(x, (list, tuple)):
+                x = x[0]
+            x = x.to(args.device)
+            _, z = vae.latent_representation(x)
+            latents.append(z.cpu())
+
+    latent_tensor = torch.cat(latents, dim=0)
+
+    latent_dataset = torch.utils.data.TensorDataset(latent_tensor)
+
+    latent_loader = torch.utils.data.DataLoader(
+        latent_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+    )
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     epoch_losses = train(
         model, 
         optimizer, 
-        train_loader, 
+        latent_loader, 
         args.epochs, 
         args.device,
-        use_latent_space=True,
-        vae_checkpoint=args.pretrained_vae_checkpoint
+        grad_clip_norm=1.0,
     )
 
     run_dir = make_run_dir(
         config,
+        beta = args.beta,
         seed=args.seed,
         lr=args.lr,
         bs=args.batch_size,

@@ -71,7 +71,7 @@ class BernoulliDecoder(nn.Module):
 
 
 class GaussianDecoder(nn.Module):
-    def __init__(self, decoder_net, fixed_sigma=0.1):
+    def __init__(self, decoder_net, fixed=False):
         """
         A Gaussian decoder distribution based on a given decoder network.
         Used for standard (non-binarized) MNIST with continuous values in [-1, 1].
@@ -79,12 +79,16 @@ class GaussianDecoder(nn.Module):
         Parameters:
         decoder_net: [torch.nn.Module]
            The decoder network.
-        fixed_sigma: [float]
-           Fixed standard deviation for the Gaussian distribution.
+        fixed: [bool]
+           Whether to fix the standard deviation.
         """
         super(GaussianDecoder, self).__init__()
         self.decoder_net = decoder_net
-        self.fixed_sigma = fixed_sigma
+        
+        if fixed:
+            self.std = nn.Parameter(torch.ones(28*28)*torch.log(torch.tensor(0.1)), requires_grad=False)
+        else:
+            self.std = nn.Parameter(torch.ones(28*28)*0.5, requires_grad=True)
 
     def forward(self, z):
         """
@@ -92,11 +96,11 @@ class GaussianDecoder(nn.Module):
 
         Parameters:
         z: [torch.Tensor]
-           A tensor of dimension (batch_size, M), where M is the dimension of the latent space.
+            A tensor of dimension (batch_size, M), where M is the dimension of the latent space.
         """
         mean = self.decoder_net(z)
-        # Use fixed variance for all pixels
-        return td.Independent(td.Normal(loc=mean, scale=self.fixed_sigma), 1)
+        
+        return td.Independent(td.Normal(loc=mean, scale=torch.exp(self.std)), 1)
 
 
 class VAE(nn.Module):
@@ -148,6 +152,7 @@ class VAE(nn.Module):
             kl = q.log_prob(z) - self.prior.log_prob(z)
 
         elbo = torch.mean(self.decoder(z).log_prob(x) - self.beta*kl, dim=0)
+        # print(f"ELBO: {elbo.item():.4f}, KL: {kl.mean().item():.4f}, Recon: {self.decoder(z).log_prob(x).mean().item():.4f}")
         return elbo
     
     def latent_representation(self, x):
@@ -180,7 +185,7 @@ class VAE(nn.Module):
         return -self.elbo(x, kl_mode=self.kl_mode)
 
 
-def train(model, optimizer, data_loader, epochs, device) -> list[float]:
+def train(model, optimizer, data_loader, epochs, device) -> tuple[list[float], dict[str, torch.Tensor], int, float]:
     """
     Train a VAE model.
 
@@ -199,6 +204,12 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
     Returns:
     epoch_losses: [list[float]]
         Average training loss per epoch.
+    best_state_dict: [dict[str, torch.Tensor]]
+        Model parameters from the epoch with best ELBO.
+    best_epoch: [int]
+        Epoch index (1-based) with best ELBO.
+    best_elbo: [float]
+        Best ELBO value observed during training.
     """
     model.train()
 
@@ -206,6 +217,9 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
     progress_bar = tqdm(range(total_steps), desc="Training")
 
     epoch_losses = []
+    best_loss = float("inf")
+    best_epoch = -1
+    best_state_dict = None
     for epoch in range(epochs):
         epoch_loss = 0.0
         num_batches = 0
@@ -223,6 +237,24 @@ def train(model, optimizer, data_loader, epochs, device) -> list[float]:
             progress_bar.set_postfix(loss=f"⠀{loss.item():12.4f}", epoch=f"{epoch+1}/{epochs}")
             progress_bar.update()
 
-        epoch_losses.append(epoch_loss / num_batches)
+        avg_epoch_loss = epoch_loss / num_batches
+        epoch_losses.append(avg_epoch_loss)
 
-    return epoch_losses
+        if avg_epoch_loss < best_loss:
+            best_loss = avg_epoch_loss
+            best_epoch = epoch + 1
+            best_state_dict = {
+                key: value.detach().cpu().clone()
+                for key, value in model.state_dict().items()
+            }
+
+    if best_state_dict is None:
+        best_state_dict = {
+            key: value.detach().cpu().clone()
+            for key, value in model.state_dict().items()
+        }
+        best_epoch = epochs
+        best_loss = epoch_losses[-1] if epoch_losses else float("inf")
+
+    best_elbo = -best_loss
+    return epoch_losses, best_state_dict, best_epoch, best_elbo
