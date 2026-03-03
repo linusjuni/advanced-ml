@@ -119,7 +119,7 @@ def main():
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-    epoch_losses = train(model, optimizer, train_loader, args.epochs, args.device)
+      = train(model, optimizer, train_loader, args.epochs, args.device)
 
     run_dir = make_run_dir(
         config,
