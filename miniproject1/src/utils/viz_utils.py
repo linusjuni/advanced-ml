@@ -70,6 +70,36 @@ def plot_sample_grid(
     return fig
 
 
+def project_to_2d(
+    z_posterior: np.ndarray,
+    z_other: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray | None]:
+    """Project latent samples to 2D for visualisation.
+
+    PCA is fit on ``z_posterior`` and applied to both arrays, so the axes
+    reflect the directions of maximum variance in the aggregate posterior.
+    For M=2 the data is returned unchanged.
+
+    Parameters:
+        z_posterior: (N, M) posterior samples used to fit PCA.
+        z_other:     (K, M) other samples (e.g. prior) to project with the
+                     same transformation.
+
+    Returns:
+        z_posterior_2d: (N, 2)
+        z_other_2d:     (K, 2)
+        explained_variance_ratio: (2,) or None when M=2.
+    """
+    from sklearn.decomposition import PCA
+
+    M = z_posterior.shape[1]
+    if M > 2:
+        pca = PCA(n_components=2)
+        pca.fit(z_posterior)
+        return pca.transform(z_posterior), pca.transform(z_other), pca.explained_variance_ratio_
+    return z_posterior, z_other, None
+
+
 def plot_prior_and_aggregate_posterior(
     model,
     data_loader,
@@ -78,49 +108,75 @@ def plot_prior_and_aggregate_posterior(
     title: str | None = None,
     device: str = "cpu",
 ):
-    """Scatter plot of the aggregate posterior q(z) vs the prior p(z) for 2D latent space.
+    """Overlaid scatter plot of the prior p(z) and aggregate posterior q(z).
 
-    Works for any prior type (Gaussian, MoG, Flow).
+    Posterior samples are coloured by MNIST digit class (0–9).  For M>2 the
+    latent space is projected to 2D via PCA (fit on the posterior) before
+    plotting.  Both distributions share the same axis limits so scale
+    differences are immediately visible.
 
     Parameters:
-        model: a VAE model (must have .encoder, .prior, and M=2).
-        data_loader: DataLoader over the dataset to encode.
+        model:           VAE with .encoder and .prior.
+        data_loader:     DataLoader returning (image, label) pairs.
+        n_prior_samples: Number of samples drawn from the prior.
     """
     model.eval()
     model.to(device)
 
-    # Collect aggregate posterior samples: encode every data point
-    z_posterior = []
+    # Aggregate posterior samples + digit labels
+    z_posterior, labels = [], []
     with torch.no_grad():
-        for x, *_ in data_loader:
+        for x, y in data_loader:
             x = x.to(device)
-            q = model.encoder(x)
-            z = q.sample()
+            z = model.encoder(x).sample()
             z_posterior.append(z.cpu())
-    z_posterior = torch.cat(z_posterior, dim=0).numpy()
+            labels.append(y)
+    z_posterior = torch.cat(z_posterior).numpy()
+    labels = torch.cat(labels).numpy()
 
-    # Sample from the prior
+    # Prior samples
     with torch.no_grad():
         z_prior = model.prior.sample(torch.Size([n_prior_samples])).cpu().numpy()
 
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    # Project both to 2D
+    z_post_2d, z_prior_2d, explained = project_to_2d(z_posterior, z_prior)
 
-    axes[0].scatter(z_prior[:, 0], z_prior[:, 1], alpha=0.3, s=4, c="tab:blue")
-    axes[0].set_title("Prior p(z)")
-    axes[0].set_xlabel("$z_1$")
-    axes[0].set_ylabel("$z_2$")
-    axes[0].set_aspect("equal")
-    axes[0].grid(True, alpha=0.3)
+    if explained is not None:
+        xlabel = f"PC1 ({100 * explained[0]:.1f}%)"
+        ylabel = f"PC2 ({100 * explained[1]:.1f}%)"
+    else:
+        xlabel, ylabel = "$z_1$", "$z_2$"
 
-    axes[1].scatter(z_posterior[:, 0], z_posterior[:, 1], alpha=0.3, s=4, c="tab:orange")
-    axes[1].set_title("Aggregate posterior q(z)")
-    axes[1].set_xlabel("$z_1$")
-    axes[1].set_ylabel("$z_2$")
-    axes[1].set_aspect("equal")
-    axes[1].grid(True, alpha=0.3)
+    # Shared axis limits with a small margin
+    all_pts = np.concatenate([z_post_2d, z_prior_2d])
+    x_margin = (all_pts[:, 0].max() - all_pts[:, 0].min()) * 0.05
+    y_margin = (all_pts[:, 1].max() - all_pts[:, 1].min()) * 0.05
+    xlim = (all_pts[:, 0].min() - x_margin, all_pts[:, 0].max() + x_margin)
+    ylim = (all_pts[:, 1].min() - y_margin, all_pts[:, 1].max() + y_margin)
+
+    fig, ax = plt.subplots(figsize=(7, 6))
+
+    # Prior (drawn first so posterior sits on top)
+    ax.scatter(z_prior_2d[:, 0], z_prior_2d[:, 1],
+               alpha=0.12, s=4, color="gray", label="prior p(z)")
+
+    # Posterior coloured by digit class
+    cmap = plt.get_cmap("tab10")
+    for digit in range(10):
+        mask = labels == digit
+        ax.scatter(z_post_2d[mask, 0], z_post_2d[mask, 1],
+                   alpha=0.3, s=4, color=cmap(digit), label=str(digit))
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.grid(True, alpha=0.3)
+    ax.legend(markerscale=3, fontsize=8, ncol=6, loc="upper right",
+              title="digit / prior", title_fontsize=8)
 
     if title:
-        fig.suptitle(title, fontsize=14)
+        fig.suptitle(title, fontsize=13)
     plt.tight_layout()
 
     if save_path:
