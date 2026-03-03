@@ -5,12 +5,13 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.distributions as td
 
 from src.dataset import get_binarized_mnist
 from src.utils.logger import get_logger
 from src.utils.model_utils import CHECKPOINTS_DIR, load_model
 from src.utils.viz_utils import plot_prior_and_aggregate_posterior, plot_sample_grid
-from src.vae import VAE
+from src.vae import VAE, KLMode
 
 logger = get_logger(__name__)
 
@@ -29,17 +30,25 @@ def _get_seed(path: Path) -> int:
     return int(m.group(1)) if m else -1
 
 
-def compute_test_elbo(model, test_loader, device: str) -> float:
-    """Return the mean test ELBO (per sample) over the full test set."""
+def compute_test_elbo(model: VAE, test_loader, device: str) -> tuple[float, float, float]:
+    """Return mean (recon, kl, elbo) per sample over the full test set."""
     model.eval()
     model.to(device)
-    total, n_batches = 0.0, 0
+    total_recon, total_kl, total_elbo, n_batches = 0.0, 0.0, 0.0, 0
     with torch.no_grad():
         for x, *_ in test_loader:
             x = x.to(device)
-            total += (-model(x)).item()   # model.forward returns −ELBO
+            q, z = model.latent_representation(x)
+            if model.kl_mode == KLMode.ANALYTIC:
+                kl = td.kl_divergence(q, model.prior())
+            else:
+                kl = q.log_prob(z) - model.prior.log_prob(z)
+            recon = model.decoder(z).log_prob(x)
+            total_recon += recon.mean().item()
+            total_kl += kl.mean().item()
+            total_elbo += (recon - model.beta * kl).mean().item()
             n_batches += 1
-    return total / n_batches
+    return total_recon / n_batches, total_kl / n_batches, total_elbo / n_batches
 
 
 def main() -> None:
@@ -55,7 +64,7 @@ def main() -> None:
         test_data, batch_size=args.batch_size, shuffle=False
     )
 
-    summary: list[tuple[str, int, float, float]] = []
+    summary: list[tuple[str, int, float, float, float, float, float, float]] = []
 
     for prior_name, pattern in PRIOR_PATTERNS.items():
         checkpoints = sorted(CHECKPOINTS_DIR.glob(pattern), key=_get_seed)
@@ -64,22 +73,31 @@ def main() -> None:
             continue
 
         logger.info(f"{prior_name.upper()} prior ({len(checkpoints)} seeds)")
-        elbos: list[float] = []
+        recons, kls, elbos = [], [], []
         seed1_model = None
 
         for ckpt_dir in checkpoints:
             seed = _get_seed(ckpt_dir)
             model, _ = load_model(ckpt_dir)
-            elbo = compute_test_elbo(model, test_loader, args.device)
+            assert(isinstance(model, VAE))
+            recon, kl, elbo = compute_test_elbo(model, test_loader, args.device)
+            recons.append(recon)
+            kls.append(kl)
             elbos.append(elbo)
-            logger.info(f"seed={seed:2d}  test ELBO = {elbo:.4f}")
+            logger.info(f"seed={seed:2d}  recon={recon:.4f}  kl={kl:.4f}  elbo={elbo:.4f}")
             if seed == 1:
                 seed1_model = model
 
-        mean_elbo = float(np.mean(elbos))
-        std_elbo = float(np.std(elbos))
-        logger.info(f"mean = {mean_elbo:.4f},  std = {std_elbo:.4f}")
-        summary.append((prior_name, len(elbos), mean_elbo, std_elbo))
+        mean_recon, std_recon = float(np.mean(recons)), float(np.std(recons))
+        mean_kl,   std_kl   = float(np.mean(kls)),   float(np.std(kls))
+        mean_elbo, std_elbo = float(np.mean(elbos)),  float(np.std(elbos))
+        logger.info(f"recon = {mean_recon:.4f} ± {std_recon:.4f}")
+        logger.info(f"kl    = {mean_kl:.4f} ± {std_kl:.4f}")
+        logger.info(f"elbo  = {mean_elbo:.4f} ± {std_elbo:.4f}")
+        summary.append((prior_name, len(elbos),
+                        mean_recon, std_recon,
+                        mean_kl,   std_kl,
+                        mean_elbo, std_elbo))
 
         if seed1_model is None:
             logger.warning(f"seed=1 checkpoint not found for {prior_name} — skipping plots")
@@ -109,15 +127,21 @@ def main() -> None:
     csv_path = RESULTS_DIR / "test_elbo.csv"
     with open(csv_path, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["prior", "n_seeds", "mean_elbo", "std_elbo"])
+        writer.writerow(["prior", "n_seeds",
+                         "mean_recon", "std_recon",
+                         "mean_kl", "std_kl",
+                         "mean_elbo", "std_elbo"])
         for row in summary:
-            writer.writerow([row[0], row[1], f"{row[2]:.4f}", f"{row[3]:.4f}"])
+            writer.writerow([row[0], row[1],
+                             f"{row[2]:.4f}", f"{row[3]:.4f}",
+                             f"{row[4]:.4f}", f"{row[5]:.4f}",
+                             f"{row[6]:.4f}", f"{row[7]:.4f}"])
 
     # Summary table
     logger.info("Summary of test ELBO results:")
-    logger.info(f"{'Prior':<12} {'Seeds':>5} {'Mean ELBO':>12} {'Std':>8}")
-    for prior_name, n, mean, std in summary:
-        logger.info(f"{prior_name:<12} {n:>5} {mean:>12.4f} {std:>8.4f}")
+    logger.info(f"{'Prior':<12} {'Seeds':>5} {'Recon':>10} {'KL':>10} {'ELBO':>10}")
+    for prior_name, n, mr, sr, mk, sk, me, se in summary:
+        logger.info(f"{prior_name:<12} {n:>5} {mr:>10.4f} {mk:>10.4f} {me:>10.4f}")
     logger.success(f"Results saved to {RESULTS_DIR}")
 
 
