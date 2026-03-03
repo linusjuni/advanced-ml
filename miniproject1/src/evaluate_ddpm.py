@@ -2,11 +2,11 @@ import argparse
 
 import torch
 
-from vae import VAE
-from ddpm import DDPM
-from utils.model_utils import load_model
-from utils.viz_utils import plot_training_curves, plot_sample_grid
-from utils.logger import get_logger
+from src.vae import VAE
+from src.ddpm import DDPM
+from src.utils.model_utils import load_model
+from src.utils.viz_utils import plot_training_curves, plot_sample_grid
+from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
