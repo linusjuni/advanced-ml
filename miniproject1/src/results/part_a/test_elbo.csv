@@ -1,0 +1,4 @@
+prior,n_seeds,mean_elbo,std_elbo
+gaussian,10,-82.8385,0.3910
+mog,10,-81.6520,0.6652
+flow,10,-79.9031,0.3635
