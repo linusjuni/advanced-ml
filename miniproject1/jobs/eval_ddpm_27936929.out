@@ -1,0 +1,66 @@
+Saved 4 samples to /zhome/e2/6/224426/project/miniproject1/samples/ddpm50_samples.png
+Samples: 1000
+Time: 27.01s (37.0 samples/sec)
+FID: 32.90
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 27936929: <eval_ddpm> in cluster <dcc> Done
+
+Job <eval_ddpm> was submitted from host <hpclogin1> by user <s254124> in cluster <dcc> at Mon Mar  2 17:32:35 2026
+Job was executed on host(s) <4*n-62-20-11>, in queue <gpuv100>, as user <s254124> in cluster <dcc> at Mon Mar  2 17:32:36 2026
+</zhome/e2/6/224426> was used as the home directory.
+</zhome/e2/6/224426/project/miniproject1> was used as the working directory.
+Started at Mon Mar  2 17:32:36 2026
+Terminated at Mon Mar  2 17:33:25 2026
+Results reported at Mon Mar  2 17:33:25 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -q gpuv100
+#BSUB -W 2:00
+#BSUB -J eval_ddpm
+#BSUB -o jobs/eval_ddpm_%J.out
+#BSUB -e jobs/eval_ddpm_%J.err
+#BSUB -n 4
+#BSUB -R "rusage[mem=8GB] span[hosts=1]"
+#BSUB -gpu "num=1:mode=exclusive_process"
+
+cd /zhome/e2/6/224426/project/miniproject1
+mkdir -p samples
+
+uv sync
+uv run python -m src.evaluate \
+    --model-path /zhome/e2/6/224426/project/miniproject1/src/checkpoints/ddpm50epoc/model.pth \
+    --n-samples 1000 \
+    --device cuda \
+    --classifier-ckpt /zhome/e2/6/224426/project/miniproject1/src/checkpoints/mnist_classifier.pth \
+    --output-dir /zhome/e2/6/224426/project/miniproject1/samples
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   45.00 sec.
+    Max Memory :                                 493 MB
+    Average Memory :                             493.00 MB
+    Total Requested Memory :                     32768.00 MB
+    Delta Memory :                               32275.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                11
+    Run time :                                   85 sec.
+    Turnaround time :                            50 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <jobs/eval_ddpm_27936929.err> for stderr output of this job.
+

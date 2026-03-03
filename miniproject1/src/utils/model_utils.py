@@ -285,7 +285,6 @@ def _build_flow_prior(M: int, num_layers: int, num_hidden: int) -> FlowPrior:
         transformations.append(MaskedCouplingLayer(scale_net, translation_net, mask))
     return FlowPrior(Flow(base, transformations))
 
-
 def _build_ddpm(config: DDPMConfig) -> nn.Module:
     from src.unet import Unet
     from src.ddpm import DDPM
