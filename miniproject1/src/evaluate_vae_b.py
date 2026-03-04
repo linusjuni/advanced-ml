@@ -41,9 +41,8 @@ if __name__ == "__main__":
 
     # === Generate 4 samples (prior → decoder mean) ===
     with torch.no_grad():
-        samples = model.sample(4)
-
-    samples = samples.view(-1, 28, 28)
+        z = model.prior.sample(torch.Size([4]))
+        samples = model.decoder(z).mean.view(-1, 28, 28)
     samples = ((samples + 1) / 2).clamp(0, 1).cpu().numpy()
 
     fig, axes = plt.subplots(1, 4, figsize=(10, 2.5))
