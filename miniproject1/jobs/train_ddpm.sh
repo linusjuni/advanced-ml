@@ -11,7 +11,7 @@
 uv sync
 uv run python -m src.train_ddpm \
     --seed 42 \
-    --epochs 20 \
+    --epochs 50 \
     --batch-size 128 \
     --lr 1e-3 \
     --T 1000 \
