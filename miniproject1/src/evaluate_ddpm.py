@@ -8,7 +8,7 @@ from src.vae import VAE
 from src.ddpm import DDPM
 from src.dataset import get_dequantized_mnist
 from src.fid import compute_fid
-from src.utils.model_utils import load_model
+from src.utils.model_utils import load_model, CHECKPOINTS_DIR
 from src.utils.viz_utils import plot_training_curves
 from src.utils.logger import get_logger
 
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     parser.add_argument("--vae-checkpoint", type=str, help="Path to VAE checkpoint directory")
     parser.add_argument("--beta", type=float, required=True, help="Beta value used for training the VAE (for labeling purposes)")
     parser.add_argument("--ddpm-checkpoint", type=str, help="Path to DDPM checkpoint directory")
-    parser.add_argument("--classifier-ckpt", type=str, default="/work3/s252653/advanced-ml/miniproject1/src/mnist_classifier.pth", help="Path to MNIST classifier for FID")
+    parser.add_argument("--classifier-ckpt", type=str, default=str(CHECKPOINTS_DIR / "mnist_classifier.pth"), help="Path to MNIST classifier for FID")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--n-fid-samples", type=int, default=10000, help="Number of samples for FID calculation")
     args = parser.parse_args()
