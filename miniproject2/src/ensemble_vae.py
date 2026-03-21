@@ -14,8 +14,6 @@ from tqdm import tqdm
 from copy import deepcopy
 import os
 import math
-import random
-import numpy as np
 import matplotlib.pyplot as plt
 
 class GaussianPrior(nn.Module):
@@ -229,12 +227,12 @@ def compute_geodesic(x_start, x_end, decoder, n_points=10, n_steps=200):
             x_end.unsqueeze(0)
         ])
 
-        decoded = decoder(full_curve)
-        means = decoded.mean
-        stds = decoded.stddev
-        prev_dist = td.Independent(td.Normal(loc=means[:-1], scale=stds[:-1]), 3)
-        next_dist = td.Independent(td.Normal(loc=means[1:], scale=stds[1:]), 3)
-        energy = td.kl_divergence(prev_dist, next_dist).sum()
+        # Decoder returns a distribution, use its mean in data space.
+        decoded = decoder(full_curve).mean
+
+        # Compute energy
+        diff = decoded[1:] - decoded[:-1]
+        energy = (diff**2).sum()
 
         energy.backward()
         return energy
@@ -250,14 +248,6 @@ def compute_geodesic(x_start, x_end, decoder, n_points=10, n_steps=200):
             x_end.unsqueeze(0)
         ])
     return full_curve
-
-
-def set_seed(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
 
 
 if __name__ == "__main__":
@@ -344,12 +334,6 @@ if __name__ == "__main__":
         metavar="N",
         help="number of points along the curve (default: %(default)s)",
     )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=42,
-        help="random seed for dataset and loader randomness (default: %(default)s)",
-    )
 
     args = parser.parse_args()
     print("# Options")
@@ -357,7 +341,6 @@ if __name__ == "__main__":
         print(key, "=", value)
 
     device = args.device
-    set_seed(args.seed)
 
     # Load a subset of MNIST and create data loaders
     def subsample(data, targets, num_data, num_classes):
@@ -388,19 +371,11 @@ if __name__ == "__main__":
         test_tensors.data, test_tensors.targets, num_train_data, num_classes
     )
 
-    train_loader_rng = torch.Generator().manual_seed(args.seed)
-    test_loader_rng = torch.Generator().manual_seed(args.seed)
     mnist_train_loader = torch.utils.data.DataLoader(
-        train_data,
-        batch_size=args.batch_size,
-        shuffle=True,
-        generator=train_loader_rng,
+        train_data, batch_size=args.batch_size, shuffle=True
     )
     mnist_test_loader = torch.utils.data.DataLoader(
-        test_data,
-        batch_size=args.batch_size,
-        shuffle=False,
-        generator=test_loader_rng,
+        test_data, batch_size=args.batch_size, shuffle=False
     )
 
     # Define prior distribution
@@ -522,7 +497,7 @@ if __name__ == "__main__":
         zs = torch.cat(zs, dim=0).numpy()
         ys = torch.cat(ys, dim=0).numpy()
 
-        rng = torch.Generator().manual_seed(args.seed)
+        rng = torch.Generator().manual_seed(42)
         indices = torch.randint(0, zs.shape[0], (25, 2), generator=rng).tolist()
 
         plt.figure(figsize=(7,6))
