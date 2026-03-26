@@ -7,6 +7,7 @@ import torch
 sys.path.insert(0, os.path.dirname(__file__))
 
 from utils.logger import get_logger
+from utils.settings import settings
 
 logger = get_logger(__name__)
 
@@ -88,9 +89,18 @@ if __name__ == "__main__":
         metavar="N",
         help="number of points along each geodesic curve (default: %(default)s)",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=settings.RANDOM_SEED,
+        metavar="N",
+        help="random seed (default: %(default)s)",
+    )
     args = parser.parse_args()
     for key, value in sorted(vars(args).items()):
         logger.info(f"{key} = {value}")
+
+    torch.manual_seed(args.seed)
 
     device = args.device
     M = args.latent_dim
@@ -131,7 +141,7 @@ if __name__ == "__main__":
         zs = torch.cat(zs).numpy()
         ys = torch.cat(ys).numpy()
 
-        rng = torch.Generator().manual_seed(42)
+        rng = torch.Generator().manual_seed(42) # fixed seed so we always get the same pairs of points
         indices = torch.randint(
             0, zs.shape[0], (args.num_curves, 2), generator=rng
         ).tolist()
