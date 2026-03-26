@@ -1,6 +1,10 @@
 import torch
 from tqdm import tqdm
 
+from utils.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 def train(model, optimizer, data_loader, epochs, device):
     """
@@ -46,7 +50,5 @@ def train(model, optimizer, data_loader, epochs, device):
                     epoch += 1
             except KeyboardInterrupt:
                 loss_str = f"{loss:.1f}" if loss is not None else "N/A"
-                print(
-                    f"Stopping training at total epoch {epoch} and current loss: {loss_str}"
-                )
+                logger.warning(f"Stopping training at epoch {epoch}, loss={loss_str}")
                 break
