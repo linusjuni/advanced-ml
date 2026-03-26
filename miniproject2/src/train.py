@@ -20,6 +20,7 @@ def train(model, optimizer, data_loader, epochs, device):
     """
     num_steps = len(data_loader) * epochs
     epoch = 0
+    loss = None
 
     def noise(x, std=0.05):
         eps = std * torch.randn_like(x)
@@ -44,7 +45,8 @@ def train(model, optimizer, data_loader, epochs, device):
                 if (step + 1) % len(data_loader) == 0:
                     epoch += 1
             except KeyboardInterrupt:
+                loss_str = f"{loss:.1f}" if loss is not None else "N/A"
                 print(
-                    f"Stopping training at total epoch {epoch} and current loss: {loss:.1f}"
+                    f"Stopping training at total epoch {epoch} and current loss: {loss_str}"
                 )
                 break
