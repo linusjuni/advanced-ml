@@ -1,11 +1,14 @@
 import os
 import argparse
+import math
 
 import torch
 
 from src.data import load_mnist
 from src.model import build_ensemble_vae
 from src.train import train
+from src.geodesics import compute_ensemble_geodesic, ensemble_curve_length
+from src.plotting import plot_latent_space_with_geodesics
 
 from utils.logger import get_logger
 from utils.settings import settings
@@ -22,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "mode",
         type=str,
-        choices=["train", "eval"],
+        choices=["train", "eval", "geodesics"],
         help="what to do when running the script (default: %(default)s)",
     )
     parser.add_argument(
@@ -67,6 +70,27 @@ if __name__ == "__main__":
         help="number of decoder ensemble members (default: %(default)s)",
     )
     parser.add_argument(
+        "--num-curves",
+        type=int,
+        default=25,
+        metavar="N",
+        help="number of geodesic pairs to compute (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--num-t",
+        type=int,
+        default=10,
+        metavar="N",
+        help="number of points along each geodesic curve (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--mc-samples",
+        type=int,
+        default=8,
+        metavar="N",
+        help="Monte Carlo samples per segment for ensemble energy (default: %(default)s)",
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         default=settings.RANDOM_SEED,
@@ -104,3 +128,65 @@ if __name__ == "__main__":
                 elbos.append(model.elbo(x.to(device)))
 
         logger.info(f"Mean test ELBO: {torch.tensor(elbos).mean().item():.4f}")
+
+    elif args.mode == "geodesics":
+        model = build_model(args.latent_dim, args.num_decoders, device)
+        model.load_state_dict(torch.load(f"{args.experiment_folder}/model.pt"))
+        logger.info(f"Model loaded from {args.experiment_folder}/model.pt")
+        model.eval()
+
+        zs, ys = [], []
+        with torch.no_grad():
+            for x, y in test_loader:
+                zs.append(model.encoder(x.to(device)).mean.cpu())
+                ys.append(y)
+
+        zs = torch.cat(zs).numpy()
+        ys = torch.cat(ys).numpy()
+
+        rng = torch.Generator().manual_seed(42)
+        indices = torch.randint(
+            0, zs.shape[0], (args.num_curves, 2), generator=rng
+        ).tolist()
+
+        geodesic_curves = []
+        distance_lines = []
+        n = len(indices)
+        for i, (start_idx, end_idx) in enumerate(indices):
+            logger.info(f"Computing geodesic {i + 1}/{n} ({start_idx} -> {end_idx})")
+            x_start = torch.tensor(zs[start_idx], dtype=torch.float32, device=device)
+            x_end = torch.tensor(zs[end_idx], dtype=torch.float32, device=device)
+            curve = compute_ensemble_geodesic(
+                x_start,
+                x_end,
+                model.decoder,
+                n_points=args.num_t,
+                mc_samples=args.mc_samples,
+            )
+            geodesic_curves.append(curve.detach().cpu().numpy())
+
+            geodesic_dist = ensemble_curve_length(
+                curve,
+                model.decoder,
+                mc_samples=args.mc_samples,
+            )
+            euclidean_dist = math.dist(zs[start_idx].tolist(), zs[end_idx].tolist())
+            distance_lines.append(
+                (
+                    f"Points {start_idx} and {end_idx}: "
+                    f"euclidean={euclidean_dist:.4f}, geodesic={geodesic_dist:.4f}"
+                )
+            )
+
+        os.makedirs(args.experiment_folder, exist_ok=True)
+        distances_path = f"{args.experiment_folder}/distances.txt"
+        with open(distances_path, "w") as f:
+            f.write("\n".join(distance_lines) + "\n")
+        logger.success(f"Distances saved to {distances_path}")
+
+        plot_path = f"{args.experiment_folder}/latent_space.png"
+        fig = plot_latent_space_with_geodesics(
+            zs, ys, geodesic_curves, save_path=plot_path
+        )
+        logger.success(f"Plot saved to {plot_path}")
+        fig.show()
