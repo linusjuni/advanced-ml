@@ -3,40 +3,14 @@ import sys
 import argparse
 
 import torch
-import torch.utils.data
-from torchvision import datasets, transforms
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+from src.data import load_mnist
 from src.model import GaussianPrior, GaussianEncoder, GaussianDecoder, VAE, new_encoder, new_decoder
 from src.train import train
 from src.geodesics import compute_geodesic, curve_length
 from src.plotting import plot_latent_space
-
-
-def subsample(data, targets, num_data, num_classes):
-    idx = targets < num_classes
-    new_data = data[idx][:num_data].unsqueeze(1).to(torch.float32) / 255
-    new_targets = targets[idx][:num_data]
-    return torch.utils.data.TensorDataset(new_data, new_targets)
-
-
-def load_data(batch_size):
-    num_train_data = 2048
-    num_classes = 3
-    train_tensors = datasets.MNIST(
-        "data/", train=True, download=True,
-        transform=transforms.Compose([transforms.ToTensor()]),
-    )
-    test_tensors = datasets.MNIST(
-        "data/", train=False, download=True,
-        transform=transforms.Compose([transforms.ToTensor()]),
-    )
-    train_data = subsample(train_tensors.data, train_tensors.targets, num_train_data, num_classes)
-    test_data = subsample(test_tensors.data, test_tensors.targets, num_train_data, num_classes)
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
-    return train_loader, test_loader
 
 
 def build_model(M, device):
@@ -110,7 +84,7 @@ if __name__ == "__main__":
 
     device = args.device
     M = args.latent_dim
-    train_loader, test_loader = load_data(args.batch_size)
+    train_loader, test_loader = load_mnist(args.batch_size)
 
     if args.mode == "train":
         os.makedirs(args.experiment_folder, exist_ok=True)
