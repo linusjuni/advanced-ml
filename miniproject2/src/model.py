@@ -83,8 +83,12 @@ class GaussianDecoder(nn.Module):
         z: [torch.Tensor]
            A tensor of dimension `(batch_size, M)`, where M is the dimension of the latent space.
         """
-        means = self.decoder_net(z)
+        means = self.mean(z)
         return td.Independent(td.Normal(loc=means, scale=1e-1), 3)
+
+    def mean(self, z):
+        """Return decoder mean f(z) for pull-back and ensemble geometry computations."""
+        return self.decoder_net(z)
 
 
 class VAE(nn.Module):
@@ -142,6 +146,7 @@ class VAE(nn.Module):
         """
         return -self.elbo(x)
 
+
 def new_encoder(M):
     """
     Construct a convolutional encoder network for 28x28 grayscale images.
@@ -166,7 +171,7 @@ def new_encoder(M):
 def new_decoder(M):
     """
     Construct a transposed-convolutional decoder network producing 28x28 grayscale images.
-    
+
     Parameters:
     M: [int]
        Dimension of the latent space.
@@ -183,4 +188,82 @@ def new_decoder(M):
         nn.Softmax(),
         nn.BatchNorm2d(16),
         nn.ConvTranspose2d(16, 1, 3, stride=2, padding=1, output_padding=1),
+    )
+
+
+class EnsembleGaussianDecoder(nn.Module):
+    def __init__(self, decoder_nets):
+        """
+        Define an ensemble Gaussian decoder with multiple decoder networks.
+
+        Parameters:
+        decoder_nets: [list[torch.nn.Module]]
+            Decoder networks that map latent variables to output means.
+        """
+        super().__init__()
+        self.decoder_nets = nn.ModuleList(decoder_nets)
+        if len(self.decoder_nets) == 0:
+            raise ValueError("decoder_nets must contain at least one decoder")
+
+    @property
+    def num_decoders(self):
+        return len(self.decoder_nets)
+
+    def sample_member_idx(self, device=None):
+        idx = torch.randint(0, self.num_decoders, (1,), device=device)
+        return int(idx.item())
+
+    def distribution(self, z, member_idx):
+        means = self.mean(z, member_idx)
+        return td.Independent(td.Normal(loc=means, scale=1e-1), 3)
+
+    def mean(self, z, member_idx):
+        """Return decoder mean f_member(z) for a specific ensemble member index."""
+        return self.decoder_nets[member_idx](z)
+
+    def forward(self, z, member_idx=None):
+        """
+        Return p(x|z) for one decoder member.
+
+        If member_idx is None, sample one member uniformly.
+        """
+        if member_idx is None:
+            member_idx = self.sample_member_idx(z.device)
+        return self.distribution(z, member_idx)
+
+
+class VAEEnsemble(nn.Module):
+    """Variational Autoencoder with one encoder and an ensemble of decoders."""
+
+    def __init__(self, prior, decoder, encoder):
+        super().__init__()
+        self.prior = prior
+        self.decoder = decoder
+        self.encoder = encoder
+
+    def elbo(self, x, member_idx=None):
+        q = self.encoder(x)
+        z = q.rsample()
+        px = self.decoder(z, member_idx=member_idx)
+        return torch.mean(px.log_prob(x) - q.log_prob(z) + self.prior().log_prob(z))
+
+    def sample(self, n_samples=1, member_idx=None):
+        z = self.prior().sample(torch.Size([n_samples]))
+        return self.decoder(z, member_idx=member_idx).sample()
+
+    def forward(self, x, member_idx=None):
+        return -self.elbo(x, member_idx=member_idx)
+
+
+def new_ensemble_decoder(M, num_decoders):
+    """Build an ensemble of decoder networks."""
+    return EnsembleGaussianDecoder([new_decoder(M) for _ in range(num_decoders)])
+
+
+def build_ensemble_vae(latent_dim, num_decoders):
+    """Convenience builder for a VAE ensemble with Gaussian prior, Gaussian encoder, and ensemble of Gaussian decoders."""
+    return VAEEnsemble(
+        GaussianPrior(latent_dim),
+        new_ensemble_decoder(latent_dim, num_decoders),
+        GaussianEncoder(new_encoder(latent_dim)),
     )
