@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 sns.set_theme(style="whitegrid", palette="muted")
 
 
-def plot_latent_space(zs, ys, geodesics, save_path=None):
+def plot_latent_space_with_geodesics(zs, ys, geodesics, save_path=None):
     """
     Plot latent space scatter with geodesic curves overlaid.
 
@@ -24,8 +24,12 @@ def plot_latent_space(zs, ys, geodesics, save_path=None):
     for label in sorted(set(ys.tolist())):
         mask = ys == label
         ax.scatter(
-            zs[mask, 0], zs[mask, 1],
-            s=8, alpha=0.7, color=palette[int(label)], label=str(label),
+            zs[mask, 0],
+            zs[mask, 1],
+            s=8,
+            alpha=0.7,
+            color=palette[int(label)],
+            label=str(label),
         )
 
     for curve in geodesics:

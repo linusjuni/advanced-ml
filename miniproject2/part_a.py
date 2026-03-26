@@ -7,10 +7,17 @@ import torch
 sys.path.insert(0, os.path.dirname(__file__))
 
 from src.data import load_mnist
-from src.model import GaussianPrior, GaussianEncoder, GaussianDecoder, VAE, new_encoder, new_decoder
+from src.model import (
+    GaussianPrior,
+    GaussianEncoder,
+    GaussianDecoder,
+    VAE,
+    new_encoder,
+    new_decoder,
+)
 from src.train import train
 from src.geodesics import compute_geodesic, curve_length
-from src.plotting import plot_latent_space
+from src.plotting import plot_latent_space_with_geodesics
 
 
 def build_model(M, device):
@@ -114,11 +121,14 @@ if __name__ == "__main__":
                 zs.append(model.encoder(x.to(device)).mean.cpu())
                 ys.append(y)
         import torch as _torch
+
         zs = _torch.cat(zs).numpy()
         ys = _torch.cat(ys).numpy()
 
         rng = torch.Generator().manual_seed(42)
-        indices = torch.randint(0, zs.shape[0], (args.num_curves, 2), generator=rng).tolist()
+        indices = torch.randint(
+            0, zs.shape[0], (args.num_curves, 2), generator=rng
+        ).tolist()
 
         geodesic_curves = []
         distance_lines = []
@@ -136,6 +146,10 @@ if __name__ == "__main__":
         with open(f"{args.experiment_folder}/geodesic_distances.txt", "w") as f:
             f.write("\n".join(distance_lines) + "\n")
 
-        fig = plot_latent_space(zs, ys, geodesic_curves,
-                                save_path=f"{args.experiment_folder}/latent_space.png")
+        fig = plot_latent_space_with_geodesics(
+            zs,
+            ys,
+            geodesic_curves,
+            save_path=f"{args.experiment_folder}/latent_space.png",
+        )
         fig.show()
