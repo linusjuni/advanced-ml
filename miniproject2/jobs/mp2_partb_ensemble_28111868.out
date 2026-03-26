@@ -1,0 +1,542 @@
+============================================================
+Training ensemble VAE: num_decoders=1, seed=1
+Saving to: miniproject2/experiments/part_b/m1_seed1
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed1
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 1
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed1/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=2
+Saving to: miniproject2/experiments/part_b/m1_seed2
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed2
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 2
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed2/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=3
+Saving to: miniproject2/experiments/part_b/m1_seed3
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed3
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 3
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed3/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=4
+Saving to: miniproject2/experiments/part_b/m1_seed4
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed4
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 4
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed4/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=5
+Saving to: miniproject2/experiments/part_b/m1_seed5
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed5
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 5
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed5/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=6
+Saving to: miniproject2/experiments/part_b/m1_seed6
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed6
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 6
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed6/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=7
+Saving to: miniproject2/experiments/part_b/m1_seed7
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed7
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 7
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed7/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=8
+Saving to: miniproject2/experiments/part_b/m1_seed8
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed8
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 8
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed8/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=9
+Saving to: miniproject2/experiments/part_b/m1_seed9
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed9
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 9
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed9/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=1, seed=10
+Saving to: miniproject2/experiments/part_b/m1_seed10
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m1_seed10
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 1
+[[97mINFO[0m] [[96m__main__[0m] seed = 10
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m1_seed10/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=1
+Saving to: miniproject2/experiments/part_b/m2_seed1
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed1
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 1
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed1/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=2
+Saving to: miniproject2/experiments/part_b/m2_seed2
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed2
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 2
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed2/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=3
+Saving to: miniproject2/experiments/part_b/m2_seed3
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed3
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 3
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed3/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=4
+Saving to: miniproject2/experiments/part_b/m2_seed4
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed4
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 4
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed4/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=5
+Saving to: miniproject2/experiments/part_b/m2_seed5
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed5
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 5
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed5/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=6
+Saving to: miniproject2/experiments/part_b/m2_seed6
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed6
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 6
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed6/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=7
+Saving to: miniproject2/experiments/part_b/m2_seed7
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed7
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 7
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed7/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=8
+Saving to: miniproject2/experiments/part_b/m2_seed8
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed8
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 8
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed8/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=9
+Saving to: miniproject2/experiments/part_b/m2_seed9
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed9
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 9
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed9/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=2, seed=10
+Saving to: miniproject2/experiments/part_b/m2_seed10
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m2_seed10
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 2
+[[97mINFO[0m] [[96m__main__[0m] seed = 10
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m2_seed10/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=1
+Saving to: miniproject2/experiments/part_b/m3_seed1
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed1
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 1
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed1/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=2
+Saving to: miniproject2/experiments/part_b/m3_seed2
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed2
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 2
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed2/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=3
+Saving to: miniproject2/experiments/part_b/m3_seed3
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed3
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 3
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed3/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=4
+Saving to: miniproject2/experiments/part_b/m3_seed4
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed4
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 4
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed4/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=5
+Saving to: miniproject2/experiments/part_b/m3_seed5
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed5
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 5
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed5/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=6
+Saving to: miniproject2/experiments/part_b/m3_seed6
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed6
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 6
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed6/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=7
+Saving to: miniproject2/experiments/part_b/m3_seed7
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed7
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 7
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed7/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=8
+Saving to: miniproject2/experiments/part_b/m3_seed8
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed8
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 8
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed8/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=9
+Saving to: miniproject2/experiments/part_b/m3_seed9
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed9
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 9
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed9/model.pt[0m
+============================================================
+Training ensemble VAE: num_decoders=3, seed=10
+Saving to: miniproject2/experiments/part_b/m3_seed10
+[[97mINFO[0m] [[96m__main__[0m] batch_size = 32
+[[97mINFO[0m] [[96m__main__[0m] device = cuda
+[[97mINFO[0m] [[96m__main__[0m] epochs = 50
+[[97mINFO[0m] [[96m__main__[0m] experiment_folder = miniproject2/experiments/part_b/m3_seed10
+[[97mINFO[0m] [[96m__main__[0m] latent_dim = 2
+[[97mINFO[0m] [[96m__main__[0m] mode = train
+[[97mINFO[0m] [[96m__main__[0m] num_decoders = 3
+[[97mINFO[0m] [[96m__main__[0m] seed = 10
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Subsampled dataset to 2048 observations with 3 classes.
+[[97mINFO[0m] [[96msrc.data[0m] Loaded MNIST with 3 classes.
+[[92mSUCCESS[0m] [[96m__main__[0m] [92m Model saved to miniproject2/experiments/part_b/m3_seed10/model.pt[0m
+All Part B training runs completed successfully.
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 28111868: <mp2_partb_ensemble> in cluster <dcc> Done
+
+Job <mp2_partb_ensemble> was submitted from host <n-62-12-19> by user <s225224> in cluster <dcc> at Thu Mar 26 15:54:18 2026
+Job was executed on host(s) <4*n-62-20-6>, in queue <gpuv100>, as user <s225224> in cluster <dcc> at Thu Mar 26 15:54:45 2026
+</zhome/77/2/187952> was used as the home directory.
+</zhome/77/2/187952/projects/advanced-ml> was used as the working directory.
+Started at Thu Mar 26 15:54:45 2026
+Terminated at Thu Mar 26 16:06:03 2026
+Results reported at Thu Mar 26 16:06:03 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+#BSUB -q gpuv100
+#BSUB -W 4:00
+#BSUB -J mp2_partb_ensemble
+#BSUB -o miniproject2/jobs/mp2_partb_ensemble_%J.out
+#BSUB -e miniproject2/jobs/mp2_partb_ensemble_%J.err
+#BSUB -n 4
+#BSUB -R "rusage[mem=8GB]"
+#BSUB -R "span[hosts=1]"
+#BSUB -gpu "num=1:mode=exclusive_process"
+
+set -euo pipefail
+
+# ---------- Config ----------
+DEVICE="cuda"
+EPOCHS=50
+BATCH_SIZE=32
+LATENT_DIM=2
+
+# Part B requirement: use 1, 2, 3 decoders and at least 10 retrainings.
+DECODER_COUNTS=(1 2 3)
+SEEDS=(1 2 3 4 5 6 7 8 9 10)
+
+BASE_DIR="miniproject2/experiments/part_b"
+# ----------------------------
+
+uv sync
+
+for NUM_DECODERS in "${DECODER_COUNTS[@]}"; do
+  for SEED in "${SEEDS[@]}"; do
+    EXP_DIR="${BASE_DIR}/m${NUM_DECODERS}_seed${SEED}"
+
+    echo "============================================================"
+    echo "Training ensemble VAE: num_decoders=${NUM_DECODERS}, seed=${SEED}"
+    echo "Saving to: ${EXP_DIR}"
+
+    uv run miniproject2/part_b.py train \
+      --num-decoders "${NUM_DECODERS}" \
+      --seed "${SEED}" \
+      --epochs "${EPOCHS}" \
+      --batch-size "${BATCH_SIZE}" \
+      --latent-dim "${LATENT_DIM}" \
+      --device "${DEVICE}" \
+      --experiment-folder "${EXP_DIR}"
+  done
+done
+
+echo "All Part B training runs completed successfully."
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   624.00 sec.
+    Max Memory :                                 925 MB
+    Average Memory :                             813.00 MB
+    Total Requested Memory :                     32768.00 MB
+    Delta Memory :                               31843.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                14
+    Run time :                                   678 sec.
+    Turnaround time :                            705 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <miniproject2/jobs/mp2_partb_ensemble_28111868.err> for stderr output of this job.
+

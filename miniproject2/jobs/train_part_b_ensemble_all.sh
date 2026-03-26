@@ -1,6 +1,6 @@
 #!/bin/bash
-#BSUB -q gpuv100
-#BSUB -W 24:00
+#BSUB -q gpua100
+#BSUB -W 4:00
 #BSUB -J mp2_partb_ensemble
 #BSUB -o miniproject2/jobs/mp2_partb_ensemble_%J.out
 #BSUB -e miniproject2/jobs/mp2_partb_ensemble_%J.err

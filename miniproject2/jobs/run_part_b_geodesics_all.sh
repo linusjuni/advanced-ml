@@ -1,6 +1,6 @@
 #!/bin/bash
 #BSUB -q gpuv100
-#BSUB -W 8:00
+#BSUB -W 12:00
 #BSUB -J mp2_partb_geodesics
 #BSUB -o miniproject2/jobs/mp2_partb_geodesics_%J.out
 #BSUB -e miniproject2/jobs/mp2_partb_geodesics_%J.err
