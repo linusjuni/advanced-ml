@@ -39,5 +39,5 @@ def plot_latent_space(zs, ys, geodesics, save_path=None):
     ax.set_title("VAE Latent Space")
 
     if save_path:
-        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
     return fig
