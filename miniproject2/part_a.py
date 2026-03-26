@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+import math
 
 import torch
 
@@ -141,7 +142,9 @@ if __name__ == "__main__":
         zs = torch.cat(zs).numpy()
         ys = torch.cat(ys).numpy()
 
-        rng = torch.Generator().manual_seed(42) # fixed seed so we always get the same pairs of points
+        rng = torch.Generator().manual_seed(
+            42
+        )  # fixed seed so we always get the same pairs of points
         indices = torch.randint(
             0, zs.shape[0], (args.num_curves, 2), generator=rng
         ).tolist()
@@ -156,17 +159,23 @@ if __name__ == "__main__":
             curve = compute_geodesic(x_start, x_end, model.decoder, n_points=args.num_t)
             geodesic_curves.append(curve.detach().cpu().numpy())
             dist = curve_length(curve, model.decoder)
+            euclidean_dist = math.dist(zs[start_idx].tolist(), zs[end_idx].tolist())
             distance_lines.append(
-                f"Geodesic distance between points {start_idx} and {end_idx}: {dist:.4f}"
+                (
+                    f"Points {start_idx} and {end_idx}: "
+                    f"euclidean={euclidean_dist:.4f}, geodesic={dist:.4f}"
+                )
             )
 
         os.makedirs(args.experiment_folder, exist_ok=True)
-        distances_path = f"{args.experiment_folder}/geodesic_distances.txt"
+        distances_path = f"{args.experiment_folder}/distances.txt"
         with open(distances_path, "w") as f:
             f.write("\n".join(distance_lines) + "\n")
         logger.success(f"Distances saved to {distances_path}")
 
         plot_path = f"{args.experiment_folder}/latent_space.png"
-        fig = plot_latent_space_with_geodesics(zs, ys, geodesic_curves, save_path=plot_path)
+        fig = plot_latent_space_with_geodesics(
+            zs, ys, geodesic_curves, save_path=plot_path
+        )
         logger.success(f"Plot saved to {plot_path}")
         fig.show()
