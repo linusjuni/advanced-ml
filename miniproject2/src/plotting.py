@@ -1,4 +1,7 @@
+import seaborn as sns
 import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid", palette="muted")
 
 
 def plot_latent_space(zs, ys, geodesics, save_path=None):
@@ -15,19 +18,26 @@ def plot_latent_space(zs, ys, geodesics, save_path=None):
     save_path: [str or None]
         If provided, save the figure to this path.
     """
+    palette = sns.color_palette("muted")
+
     fig, ax = plt.subplots(figsize=(7, 6))
-    sc = ax.scatter(zs[:, 0], zs[:, 1], c=ys, s=8, cmap="tab10", alpha=0.7)
+    for label in sorted(set(ys.tolist())):
+        mask = ys == label
+        ax.scatter(
+            zs[mask, 0], zs[mask, 1],
+            s=8, alpha=0.7, color=palette[int(label)], label=str(label),
+        )
 
     for curve in geodesics:
-        ax.plot(curve[:, 0], curve[:, 1], "r-", alpha=0.5, linewidth=1)
-        ax.scatter(*curve[0], c="green", s=50, zorder=5)
-        ax.scatter(*curve[-1], c="red", s=50, zorder=5)
+        ax.plot(curve[:, 0], curve[:, 1], "-", color=palette[3], alpha=0.5, linewidth=1)
+        ax.scatter(*curve[0], color=palette[2], s=50, zorder=5)
+        ax.scatter(*curve[-1], color=palette[3], s=50, zorder=5)
 
-    plt.colorbar(sc, ax=ax)
+    ax.legend(title="Class", markerscale=2)
     ax.set_xlabel("z1")
     ax.set_ylabel("z2")
     ax.set_title("VAE Latent Space")
 
     if save_path:
-        fig.savefig(save_path)
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
     return fig
