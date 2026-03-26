@@ -3,6 +3,7 @@ import torch.utils.data
 from torchvision import datasets, transforms
 
 from utils.logger import get_logger
+from utils.settings import settings
 
 logger = get_logger(__name__)
 
@@ -48,8 +49,8 @@ def load_mnist(batch_size, num_train_data=2048, num_classes=3):
     test_loader: [torch.utils.data.DataLoader]
     """
     to_tensor = transforms.Compose([transforms.ToTensor()])
-    train_tensors = datasets.MNIST("data/", train=True, download=True, transform=to_tensor)
-    test_tensors = datasets.MNIST("data/", train=False, download=True, transform=to_tensor)
+    train_tensors = datasets.MNIST(settings.DATA_DIR, train=True, download=True, transform=to_tensor)
+    test_tensors = datasets.MNIST(settings.DATA_DIR, train=False, download=True, transform=to_tensor)
 
     train_data = subsample(train_tensors.data, train_tensors.targets, num_train_data, num_classes)
     test_data = subsample(test_tensors.data, test_tensors.targets, num_train_data, num_classes)

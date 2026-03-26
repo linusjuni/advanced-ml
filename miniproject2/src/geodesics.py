@@ -74,4 +74,4 @@ def curve_length(curve, decoder):
     with torch.no_grad():
         decoded = decoder(curve).mean
         diff = decoded[1:] - decoded[:-1]
-        return diff.norm(dim=list(range(1, diff.ndim))).sum().item()
+        return diff.flatten(1).norm(dim=1).sum().item()

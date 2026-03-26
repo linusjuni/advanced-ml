@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -33,7 +35,7 @@ def plot_latent_space_with_geodesics(zs, ys, geodesics, save_path=None):
         )
 
     for curve in geodesics:
-        ax.plot(curve[:, 0], curve[:, 1], "-", color=palette[3], alpha=0.5, linewidth=1)
+        ax.plot(curve[:, 0], curve[:, 1], "-", color=palette[3], alpha=0.5, linewidth=1.5)
         ax.scatter(*curve[0], color=palette[2], s=50, zorder=5)
         ax.scatter(*curve[-1], color=palette[3], s=50, zorder=5)
 
