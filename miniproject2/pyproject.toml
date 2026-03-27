@@ -3,4 +3,10 @@ name = "miniproject2"
 version = "0.1.0"
 description = "Miniproject 2"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.2",
+    "seaborn>=0.13.2",
+    "torch>=2.10.0",
+    "tqdm>=4.67.3",
+]
