@@ -1,0 +1,13 @@
+model,n_decoders,dist_type,mean,std,cov_pooled,cov_per_pair_mean,cov_per_pair_std
+m1,1,euclidean,3.9497,2.0507,0.5192,0.1805,0.0686
+m1,1,geodesic,9.7644,4.642,0.4754,0.1342,0.0716
+m2,2,euclidean,2.8118,1.3742,0.4887,0.1855,0.0689
+m2,2,geodesic,12.4255,2.6367,0.2122,0.0612,0.0176
+m3,3,euclidean,2.252,1.1853,0.5263,0.2026,0.0617
+m3,3,geodesic,13.7711,2.1828,0.1585,0.0482,0.0128
+
+# Summary across all models
+# euclidean_cov_mean: 0.1895
+# euclidean_cov_std: 0.0671
+# geodesic_cov_mean: 0.0812
+# geodesic_cov_std: 0.0574
