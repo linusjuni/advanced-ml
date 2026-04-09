@@ -1,0 +1,61 @@
+\section*{Code snippets}
+
+\noindent Snippets are condensed for space; full implementations are in the submitted code archive.
+
+\subsubsection*{Part A: Curve energy}
+Implements $\mathcal{E}(c) = \sum_i \|f(z_{i+1}) - f(z_i)\|^2$ by decoding all curve points in a single forward pass.
+\begin{lstlisting}
+def energy_loss():
+    optimizer.zero_grad()
+    full_curve = torch.cat([x_start.unsqueeze(0), interior, x_end.unsqueeze(0)])
+    decoded = decoder(full_curve).mean
+    diff = decoded[1:] - decoded[:-1]
+    energy = (diff**2).sum()
+    energy.backward()
+    return energy
+\end{lstlisting}
+
+\subsubsection*{Part A: Geodesic computation}
+Initialises with linear interpolation, fixes endpoints, and minimises energy over interior points with L-BFGS.
+\begin{lstlisting}
+def compute_geodesic(x_start, x_end, decoder, n_points=10, n_steps=200):
+    t = torch.linspace(0, 1, n_points)
+    curve = torch.stack([(1 - ti)*x_start + ti*x_end for ti in t])
+    interior = curve[1:-1].clone().requires_grad_(True)
+    optimizer = torch.optim.LBFGS([interior], lr=1)
+    for _ in range(n_steps):
+        optimizer.step(energy_loss)
+    return torch.cat([x_start.unsqueeze(0), interior.detach(), x_end.unsqueeze(0)])
+\end{lstlisting}
+
+\subsubsection*{Part B: Monte Carlo ensemble segment energy}
+Monte Carlo estimate of $\mathbb{E}_{l,k}[\|f_l(z_i) - f_k(z_{i+1})\|^2]$ by sampling decoder pairs uniformly.
+\begin{lstlisting}
+def _ensemble_segment_sqnorm(z_l, z_r, decoder, member_l, member_k):
+    sq_sum, n_mc = 0., member_l.numel()
+    for m in range(n_mc):
+        fl = decoder.mean(z_l, int(member_l[m]))
+        fk = decoder.mean(z_r, int(member_k[m]))
+        sq_sum += ((fl - fk)**2).sum()
+    return sq_sum / n_mc
+\end{lstlisting}
+
+\subsubsection*{Part B: Ensemble geodesic energy loop}
+Decoder pairs are sampled once before optimisation and reused each step to keep gradients stable.
+\begin{lstlisting}
+member_l = torch.randint(0, num_decoders, (num_segments, mc_samples))
+member_k = torch.randint(0, num_decoders, (num_segments, mc_samples))
+
+def energy_loss():
+    optimizer.zero_grad()
+    full_curve = torch.cat([x_start.unsqueeze(0), interior, x_end.unsqueeze(0)])
+    energy = sum(
+        _ensemble_segment_sqnorm(
+            full_curve[i].unsqueeze(0), full_curve[i+1].unsqueeze(0),
+            decoder, member_l[i], member_k[i]
+        )
+        for i in range(num_segments)
+    )
+    energy.backward()
+    return energy
+\end{lstlisting}

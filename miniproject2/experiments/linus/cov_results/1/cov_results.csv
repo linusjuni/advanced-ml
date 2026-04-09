@@ -1,0 +1,7 @@
+model,n_decoders,dist_type,n_pairs,cov_mean,cov_std
+m1,1,euclidean,25,0.1903,0.0738
+m1,1,geodesic,25,0.1415,0.077
+m2,2,euclidean,25,0.1955,0.0741
+m2,2,geodesic,25,0.0645,0.0189
+m3,3,euclidean,25,0.2136,0.0664
+m3,3,geodesic,25,0.0508,0.0138

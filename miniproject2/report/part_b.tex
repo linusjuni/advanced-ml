@@ -1,0 +1,29 @@
+\subsection*{Part B: Ensemble geometry}
+
+To assess the reliability of geodesic versus Euclidean distances, we train $M=10$ VAEs for each ensemble size (1, 2, and 3 decoders) and compute the coefficient of variation (CoV) across models for each of 25 fixed test-point pairs. For a fixed pair $(y_i, y_j)$, the CoV is
+
+\begin{equation}
+    \text{CoV}_{ij} = \frac{\sigma\{d_{ij}^{(1)}, \ldots, d_{ij}^{(M)}\}}{\mu\{d_{ij}^{(1)}, \ldots, d_{ij}^{(M)}\}},
+    \label{eq:cov}
+\end{equation}
+
+\noindent where $d_{ij}^{(m)}$ is the distance (Euclidean or geodesic) between the latent means of $y_i$ and $y_j$ under the $m$th VAE, and $\sigma$ denotes the sample standard deviation. Geodesics are computed by minimising the model-average energy from \autoref{eq:cov}, approximating the expectation over decoder pairs $(l,k)$ with Monte Carlo (see code snippets).
+
+\autoref{fig:part_b} shows the ensemble latent space and the mean per-pair CoV as a function of decoder count. The Euclidean CoV remains roughly constant at $0.190$, $0.196$, and $0.214$ for 1, 2, and 3 decoders respectively -- basically: ensemble size has no effect on Euclidean stability, as expected since those distances do not involve the decoder. In contrast, the geodesic CoV drops from $0.142$ with one decoder to $0.065$ with two and $0.051$ with three, a reduction of roughly $64\,\%$. The largest gain comes from adding just a second decoder, with a further modest improvement at three. With three decoders, geodesic distances are roughly four times more stable than Euclidean distances across retrainings. The model-average energy achieves this by penalising curve variance across the ensemble -- paths through regions where decoders disagree carry high energy and are avoided, drawing geodesics toward the data manifold where models are in agreement. Where a single decoder is noisy, the ensemble average is not.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.46\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{media/latent_space_m3_seed_1.png}
+    \caption{Ensemble geodesics ($M=3$, seed~1)}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{media/cov_vs_decoders.png}
+    \caption{CoV vs.\ number of decoders}
+  \end{subfigure}
+  \caption{Left: 25 geodesics computed under the 3-decoder ensemble. Right: mean CoV\,$\pm$\,std across 25 point pairs for 10 retrainings per configuration.}
+  \label{fig:part_b}
+\end{figure}

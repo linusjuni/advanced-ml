@@ -1,0 +1,24 @@
+\subsection*{Part A: Pull-back geodesics}
+
+\noindent We train a VAE \cite{kingma2022autoencodingvariationalbayes} with 2D latent space on a 3-class MNIST subset (2048 observations, Gaussian prior and likelihood) and compute geodesics under the pull-back metric induced by the decoder mean $f(z)$. Geodesics minimise the discrete curve energy $\mathcal{E}(c)=\sum_i\|f(z_{i+1})-f(z_i)\|^2$ via L-BFGS, initialised with linear interpolation between fixed endpoints (see code snippets) \cite{hauberg2026latent}.
+
+\autoref{fig:part_a} shows 25 geodesics for two independent training runs. The learned representations differ a bunch -- classes arrange differently due to the identifiability problem inherent in the VAE: the model can reparametrise the latent space without changing the data distribution, so different training runs recover geometrically distinct but equally valid embeddings \cite{hauberg2026latent}. In both runs, geodesics curve along the data manifold, going around low density gaps, and are on average ${\sim}2.5\times$ longer than the straight-line Euclidean distance. While geodesic lengths are theoretically invariant to such reparametrisations, we still observe variation across seeds (e.g.\ pair 1687--130: 17.6 vs.\ 19.1), indicating that different seeds converge to slightly different manifold approximations $f$. This is what directly motivates the ensemble approach in Part B.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/latent_space_seed_42.png}
+        \caption{Training with seed 42}
+        \label{fig:latent_seed_42}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{media/latent_space_seed_69.png}
+        \caption{Training with seed 69}
+        \label{fig:latent_seed_69}
+    \end{subfigure}
+    \caption{Latent space with 25 geodesics for two training runs. The class layout rotates across seeds, but geodesics consistently follow the data manifold in both cases.}
+    \label{fig:part_a}
+\end{figure}
