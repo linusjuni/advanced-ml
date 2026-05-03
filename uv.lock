@@ -788,6 +788,20 @@ requires-dist = [
 name = "miniproject3"
 version = "0.1.0"
 source = { editable = "miniproject3" }
+dependencies = [
+    { name = "networkx" },
+    { name = "pydantic-settings" },
+    { name = "python-dotenv" },
+    { name = "torch-geometric" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "networkx", specifier = ">=3.2.1" },
+    { name = "pydantic-settings", specifier = ">=2.0.0" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "torch-geometric", specifier = ">=2.6.1" },
+]
 
 [[package]]
 name = "mpmath"
