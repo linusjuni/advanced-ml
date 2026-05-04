@@ -4,11 +4,12 @@ from pathlib import Path
 
 import torch
 from torch_geometric.loader import DataLoader
+from torch_geometric.utils import to_dense_adj, to_dense_batch
 
 sys.path.insert(0, ".")
 
 from src.data import load_mutag
-from src.models.GCN import Decoder, Encoder, GraphVAE
+from src.models.GCN import GraphVAE
 from utils.logger import get_logger
 from utils.settings import settings
 
@@ -25,11 +26,17 @@ def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device) -> dict[
 
     for batch in loader:
         batch = batch.to(device)
-        adj_logits, A_true, mu, logvar, mask = model(batch.x, batch.edge_index, batch.batch)
-        loss, recon, kl = model.loss(adj_logits, A_true.float(), mu, logvar, mask)
-        total_loss += float(loss)
-        total_recon += float(recon)
-        total_kl += float(kl)
+        A_true = to_dense_adj(batch.edge_index, batch.batch, max_num_nodes=model.max_nodes).float()
+        _, mask = to_dense_batch(batch.x, batch.batch, max_num_nodes=model.max_nodes)
+
+        mu, logvar = model.encoder(batch.x, batch.edge_index, batch.batch)
+        z = model.reparameterize(mu, logvar)
+        adj_logits = model.decoder(z)
+
+        loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask)
+        total_loss += loss.detach().item()
+        total_recon += recon.detach().item()
+        total_kl += kl.detach().item()
         num_batches += 1
 
     denom = max(1, num_batches)
@@ -42,12 +49,12 @@ def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device) -> dict[
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train GraphVAE on MUTAG (dense-adj reconstruction).")
-    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=0.0)
-    parser.add_argument("--hidden-dim", type=int, default=32)
-    parser.add_argument("--latent-dim", type=int, default=32)
+    parser.add_argument("--hidden-dim", type=int, default=128)
+    parser.add_argument("--latent-dim", type=int, default=64)
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=settings.RANDOM_SEED)
     parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"])
@@ -67,9 +74,12 @@ def main() -> None:
     train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=False)
 
-    encoder = Encoder(node_feature_dim=node_feature_dim, hidden_dim=args.hidden_dim, latent_dim=args.latent_dim)
-    decoder = Decoder(latent_dim=args.latent_dim, hidden_dim=args.hidden_dim, max_nodes=max_nodes)
-    model = GraphVAE(encoder=encoder, decoder=decoder, max_nodes=max_nodes, latent_dim=args.latent_dim).to(device)
+    model = GraphVAE(
+        in_dim=node_feature_dim,
+        hidden_dim=args.hidden_dim,
+        latent_dim=args.latent_dim,
+        max_nodes=max_nodes,
+    ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
@@ -90,8 +100,14 @@ def main() -> None:
         for batch in train_loader:
             batch = batch.to(device)
 
-            adj_logits, A_true, mu, logvar, mask = model(batch.x, batch.edge_index, batch.batch)
-            loss, recon, kl = model.loss(adj_logits, A_true.float(), mu, logvar, mask)
+            A_true = to_dense_adj(batch.edge_index, batch.batch, max_num_nodes=model.max_nodes).float()
+            _, mask = to_dense_batch(batch.x, batch.batch, max_num_nodes=model.max_nodes)
+
+            mu, logvar = model.encoder(batch.x, batch.edge_index, batch.batch)
+            z = model.reparameterize(mu, logvar)
+            adj_logits = model.decoder(z)
+
+            loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask)
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -99,9 +115,9 @@ def main() -> None:
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=args.grad_clip)
             optimizer.step()
 
-            running_loss += float(loss)
-            running_recon += float(recon)
-            running_kl += float(kl)
+            running_loss += loss.detach().item()
+            running_recon += recon.detach().item()
+            running_kl += kl.detach().item()
             num_batches += 1
 
         train_metrics = {
