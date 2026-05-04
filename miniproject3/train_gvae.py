@@ -49,7 +49,7 @@ def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device) -> dict[
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train GraphVAE on MUTAG (dense-adj reconstruction).")
-    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--epochs", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=0.0)
