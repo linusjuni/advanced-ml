@@ -78,19 +78,19 @@ class GraphVAE(nn.Module):
         return recon_loss + beta * kl, recon_loss, kl
 
     @torch.no_grad()
-    def sample(self, num_samples: int, device, node_counts: np.ndarray, probs: np.ndarray) -> list[nx.Graph]:
+    def sample(self, num_samples: int, device, node_counts: np.ndarray, probs: np.ndarray, temperature: float = 1.0) -> list[nx.Graph]:
         """Sample graphs with variable node counts drawn from the empirical training distribution.
 
         For each sample: draw N ~ Categorical(node_counts, probs), decode a latent z,
-        threshold the top-left N×N submatrix of the adjacency logits, and return as nx.Graph.
+        and sample each edge independently from Bernoulli(sigmoid(adj_logit)).
         """
         rng    = np.random.default_rng()
         graphs = []
         for _ in range(num_samples):
             n          = int(rng.choice(node_counts, p=probs))
-            z          = torch.randn(1, self.latent_dim).to(device)
+            z          = torch.randn(1, self.latent_dim).to(device) * temperature
             adj_logits = self.decoder(z)[0]          # (max_nodes, max_nodes)
-            adj        = (torch.sigmoid(adj_logits[:n, :n]) > 0.5).float()
+            adj        = torch.bernoulli(torch.sigmoid(adj_logits[:n, :n]))
             adj        = torch.triu(adj, diagonal=1)
             adj        = (adj + adj.T).cpu().numpy()
             graphs.append(nx.from_numpy_array(adj))

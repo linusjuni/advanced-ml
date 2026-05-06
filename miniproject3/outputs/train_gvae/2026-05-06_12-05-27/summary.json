@@ -1,0 +1,19 @@
+{
+  "best_test_loss": 58.62443542480469,
+  "best_epoch": 198,
+  "final_train_loss": 57.70747604370117,
+  "total_epochs": 200,
+  "hyperparams": {
+    "epochs": 200,
+    "batch_size": 32,
+    "lr": 0.001,
+    "weight_decay": 0.01,
+    "hidden_dim": 128,
+    "latent_dim": 64,
+    "grad_clip": 1.0,
+    "kl_warmup_epochs": 5,
+    "beta_max": 1.0,
+    "seed": 42,
+    "device": "cuda"
+  }
+}

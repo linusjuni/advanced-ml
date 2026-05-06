@@ -65,6 +65,18 @@ def main() -> None:
     run_dir = Path(settings.OUTPUT_DIR) / "evaluation" / timestamp
     run_dir.mkdir(parents=True, exist_ok=True)
 
+    ckpt_path = Path(args.checkpoint).resolve()
+    ckpt_meta = torch.load(ckpt_path, map_location="cpu", weights_only=True)
+    eval_config = {
+        "checkpoint": str(ckpt_path),
+        "training_run": str(ckpt_path.parent),
+        "train_args": ckpt_meta.get("args", {}),
+        "num_samples": args.num_samples,
+    }
+    with open(run_dir / "eval_config.json", "w") as f:
+        json.dump(eval_config, f, indent=2)
+    logger.info("Saved eval config", checkpoint=str(ckpt_path))
+
     train_data, _ = load_mutag()
     train_graphs = [pyg_to_nx(d) for d in train_data]
     logger.info("Converted training data to nx", num_graphs=len(train_graphs))
@@ -75,7 +87,7 @@ def main() -> None:
 
     # GraphVAE sampling
     device = torch.device(args.device)
-    ckpt = torch.load(args.checkpoint, map_location=device, weights_only=True)
+    ckpt = torch.load(ckpt_path, map_location=device, weights_only=True)
     model = GraphVAE(
         in_dim=ckpt["node_feature_dim"],
         hidden_dim=ckpt["args"]["hidden_dim"],

@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -787,17 +787,21 @@ name = "miniproject3"
 version = "0.1.0"
 source = { editable = "miniproject3" }
 dependencies = [
+    { name = "matplotlib" },
     { name = "networkx" },
     { name = "pydantic-settings" },
     { name = "python-dotenv" },
+    { name = "seaborn" },
     { name = "torch-geometric" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "matplotlib", specifier = ">=3.8.0" },
     { name = "networkx", specifier = ">=3.2.1" },
     { name = "pydantic-settings", specifier = ">=2.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "seaborn", specifier = ">=0.13.0" },
     { name = "torch-geometric", specifier = ">=2.6.1" },
 ]
 

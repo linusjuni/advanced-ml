@@ -56,6 +56,7 @@ def main() -> None:
     parser.add_argument("--latent-dim", type=int, default=64)
     parser.add_argument("--grad-clip", type=float, default=1.0)
     parser.add_argument("--kl-warmup-epochs", type=int, default=50)
+    parser.add_argument("--beta-max", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=settings.RANDOM_SEED)
     parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"])
     args = parser.parse_args()
@@ -94,7 +95,7 @@ def main() -> None:
     all_metrics = []
 
     for epoch in range(1, args.epochs + 1):
-        beta = min(1.0, epoch / args.kl_warmup_epochs) if args.kl_warmup_epochs > 0 else 1.0
+        beta = min(args.beta_max, args.beta_max * epoch / args.kl_warmup_epochs) if args.kl_warmup_epochs > 0 else args.beta_max
 
         model.train()
         running_loss = 0.0
