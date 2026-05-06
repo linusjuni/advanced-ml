@@ -1,3 +1,5 @@
+import numpy as np
+import networkx as nx
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -76,23 +78,20 @@ class GraphVAE(nn.Module):
         return recon_loss + kl, recon_loss, kl
 
     @torch.no_grad()
-    def sample(self, num_samples, device):
-        z          = torch.randn(num_samples, self.latent_dim).to(device)
-        adj_logits = self.decoder(z)
-        A          = (torch.sigmoid(adj_logits) > 0.5).float()
-        A          = torch.triu(A, diagonal=1)
-        return A + A.transpose(1, 2)
+    def sample(self, num_samples: int, device, node_counts: np.ndarray, probs: np.ndarray) -> list[nx.Graph]:
+        """Sample graphs with variable node counts drawn from the empirical training distribution.
 
-
-if __name__ == "__main__":
-    model      = GraphVAE(in_dim=10, hidden_dim=32, latent_dim=16, max_nodes=20)
-    x          = torch.randn(4, 10)
-    edge_index = torch.tensor([[0, 1, 2, 3], [1, 0, 3, 2]])
-    batch      = torch.tensor([0, 0, 1, 1])
-
-    adj_logits, A, mu, logvar, mask = model(x, edge_index, batch)
-    print("adj_logits:", adj_logits.shape)   # (2 x 20 x 20)
-    print("A:         ", A.shape)            # (2 x 20 x 20)
-    print("mu:        ", mu.shape)           # (2 x 16)
-    print("logvar:    ", logvar.shape)       # (2 x 16)
-    print("mask:      ", mask.shape)         # (2 x 20)
+        For each sample: draw N ~ Categorical(node_counts, probs), decode a latent z,
+        threshold the top-left N×N submatrix of the adjacency logits, and return as nx.Graph.
+        """
+        rng    = np.random.default_rng()
+        graphs = []
+        for _ in range(num_samples):
+            n          = int(rng.choice(node_counts, p=probs))
+            z          = torch.randn(1, self.latent_dim).to(device)
+            adj_logits = self.decoder(z)[0]          # (max_nodes, max_nodes)
+            adj        = (torch.sigmoid(adj_logits[:n, :n]) > 0.5).float()
+            adj        = torch.triu(adj, diagonal=1)
+            adj        = (adj + adj.T).cpu().numpy()
+            graphs.append(nx.from_numpy_array(adj))
+        return graphs

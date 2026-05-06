@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(0, ".")
-
 from src.data import load_mutag
 from src.baseline import ErdosRenyiBaseline, build_node_count_distribution, compute_link_probability
 

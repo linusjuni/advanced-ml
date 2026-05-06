@@ -1,15 +1,12 @@
 import argparse
-import sys
 from pathlib import Path
 
 import torch
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import to_dense_adj, to_dense_batch
 
-sys.path.insert(0, ".")
-
 from src.data import load_mutag
-from src.models.GCN import GraphVAE
+from src.models.graphvae import GraphVAE
 from utils.logger import get_logger
 from utils.settings import settings
 
