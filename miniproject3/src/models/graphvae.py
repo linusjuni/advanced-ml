@@ -63,7 +63,7 @@ class GraphVAE(nn.Module):
         adj_logits    = self.decoder(z)
         return adj_logits, A, mu, logvar, mask
 
-    def loss(self, adj_logits, A, mu, logvar, mask):
+    def loss(self, adj_logits, A, mu, logvar, mask, beta=1.0):
         node_mask  = mask.unsqueeze(1) & mask.unsqueeze(2)
 
         recon_loss = F.binary_cross_entropy_with_logits(
@@ -75,7 +75,7 @@ class GraphVAE(nn.Module):
             1 + logvar - mu.pow(2) - logvar.exp(), dim=1
         ).mean()
 
-        return recon_loss + kl, recon_loss, kl
+        return recon_loss + beta * kl, recon_loss, kl
 
     @torch.no_grad()
     def sample(self, num_samples: int, device, node_counts: np.ndarray, probs: np.ndarray) -> list[nx.Graph]:
