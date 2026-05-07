@@ -1,0 +1,73 @@
+\section*{Code snippets}
+
+\noindent Snippets are condensed for space; full implementations are in the submitted code archive.
+
+\subsubsection*{Part A: GCN encoder}
+Two GCN layers aggregate neighbour features; global mean pooling collapses the node embeddings to a
+graph-level vector, which is projected to $(\boldsymbol{\mu}, \log\boldsymbol{\sigma}^2)$.
+\begin{lstlisting}
+class Encoder(nn.Module):
+    def __init__(self, in_dim, hidden_dim, latent_dim, num_layers=2):
+        super().__init__()
+        convs = [GCNConv(in_dim if i == 0 else hidden_dim, hidden_dim)
+                 for i in range(num_layers)]
+        self.convs     = nn.ModuleList(convs)
+        self.fc_mu     = nn.Linear(hidden_dim, latent_dim)
+        self.fc_logvar = nn.Linear(hidden_dim, latent_dim)
+
+    def forward(self, x, edge_index, batch):
+        for conv in self.convs:
+            x = F.relu(conv(x, edge_index))
+        x = global_mean_pool(x, batch)
+        return self.fc_mu(x), self.fc_logvar(x)
+\end{lstlisting}
+
+\subsubsection*{Part B: Masked ELBO loss}
+\texttt{node\_mask} restricts the BCE to real node pairs, ignoring padding. $\beta$ is annealed
+linearly from 0 to 1 over the first 50 epochs to stabilise early training.
+\begin{lstlisting}
+def loss(self, adj_logits, A, mu, logvar, mask, beta=1.0):
+    node_mask  = mask.unsqueeze(1) & mask.unsqueeze(2)
+    recon_loss = F.binary_cross_entropy_with_logits(
+        adj_logits, A, reduction="none"
+    )
+    recon_loss = (recon_loss * node_mask.float()).sum(dim=(1, 2)).mean()
+    kl = -0.5 * torch.sum(
+        1 + logvar - mu.pow(2) - logvar.exp(), dim=1
+    ).mean()
+    return recon_loss + beta * kl
+\end{lstlisting}
+
+\subsubsection*{Part C: Bernoulli graph sampling}
+Drawing $N$ from the empirical node-count distribution and sampling each edge independently from
+$\mathrm{Bernoulli}(\sigma(\hat{A}_{ij}))$ raises uniqueness from 22.3\% to 100\% with no
+retraining; a hard threshold $(\sigma > 0.5)$ makes decoding deterministic.
+\begin{lstlisting}
+def sample(self, num_samples, device, node_counts, probs):
+    graphs = []
+    for _ in range(num_samples):
+        n      = int(np.random.choice(node_counts, p=probs))
+        z      = torch.randn(1, self.latent_dim, device=device)
+        logits = self.decoder(z)[0]            # (max_nodes, max_nodes)
+        adj    = torch.bernoulli(torch.sigmoid(logits[:n, :n]))
+        adj    = torch.triu(adj, diagonal=1)
+        adj    = (adj + adj.T).cpu().numpy()
+        graphs.append(nx.from_numpy_array(adj))
+    return graphs
+\end{lstlisting}
+
+\subsubsection*{Part D: Erdős-Rényi baseline}
+The link probability $r$ is computed from training graphs with exactly $N$ nodes; the
+\texttt{//\,2} corrects for PyG storing each undirected edge in both directions.
+\begin{lstlisting}
+def compute_link_probability(train_data, n):
+    graphs   = [d for d in train_data if d.num_nodes == n]
+    edges    = sum(d.edge_index.shape[1] // 2 for d in graphs)
+    possible = sum(d.num_nodes * (d.num_nodes - 1) // 2 for d in graphs)
+    return edges / possible
+
+def sample(self):
+    n = int(self._rng.choice(self.node_counts, p=self.probs))
+    r = compute_link_probability(self.train_data, n)
+    return nx.erdos_renyi_graph(n=n, p=r)
+\end{lstlisting}

@@ -1,0 +1,3 @@
+\section{Conclusion}
+
+GraphVAE generates diverse, novel graphs, but its structural statistics deviate from the empirical distribution, especially in edge density. Its main failure is a systematic density bias: the decoder overshoots edge counts relative to real MUTAG graphs. The Erdős-Rényi baseline matches the degree distribution more closely, but only because it looks up the training density directly --- not because it has learned anything. Fixing the density bias, for example by conditioning the decoder on $N$ or penalising density explicitly, is the natural next step.

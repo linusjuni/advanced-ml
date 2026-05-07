@@ -1,0 +1,25 @@
+\section{Dataset and Model}
+
+\textbf{Dataset.}
+MUTAG~\cite{debnath1991structure} contains 188 molecular graphs where nodes are atoms (7 types, one-hot encoded) and edges are chemical bonds. Graphs range from 10 to 28 nodes (mean 17.9) with a mean edge density of 0.138. We split 80/20 into train/test (150/38 graphs).
+
+\textbf{Erdős-Rényi baseline.}
+For each sample: draw $N$ from the empirical node-count distribution, set $r$ to the graph density of all $N$-node training graphs, and return $G(N, r)$.
+
+\textbf{GraphVAE.}
+We train a VAE with a graph-level latent $\mathbf{z} \in \mathbb{R}^{64}$.
+The encoder runs two GCN layers (hidden dim 128), pools node embeddings with global mean pooling, and maps to $(\boldsymbol{\mu}, \log\boldsymbol{\sigma}^2)$ via two linear heads.
+The decoder is an MLP ($64 \to 128 \to n_{\max}^2$, $n_{\max}{=}28$) whose output is reshaped and symmetrised as $(A + A^\top)/2$ to produce adjacency logits.
+
+We train on the ELBO with masked reconstruction:
+\begin{equation*}
+  \mathcal{L} = \sum_{i,j} m_{ij}\,\mathrm{BCE}(\hat{A}_{ij}, A_{ij})
+              + \beta\,\mathrm{KL}\!\left(q_\phi(\mathbf{z}|\mathcal{G})\,\|\,\mathcal{N}(\mathbf{0},\mathbf{I})\right),
+\end{equation*}
+where $m_{ij}$ masks out padding nodes and $\beta$ is annealed linearly from 0 to 1 over the first 50 epochs.
+We use Adam ($\text{lr}{=}10^{-3}$, 1000 epochs, batch size 32, gradient clipping at norm 1).
+
+\textbf{Sampling.}
+Draw $N$ from the empirical distribution, sample $\mathbf{z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$, and take the top-left $N{\times}N$ block of the decoded logits.
+Each edge is then sampled independently from $\mathrm{Bernoulli}(\sigma(\hat{A}_{ij}))$.
+This last step matters: a hard threshold $(\sigma(\hat{A}_{ij}) > 0.5)$ makes decoding deterministic and collapses diversity to 22.3\% unique graphs; Bernoulli sampling brings it to 100\% with no retraining.
