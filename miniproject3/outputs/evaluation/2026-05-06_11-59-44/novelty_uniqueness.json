@@ -1,0 +1,12 @@
+{
+  "baseline": {
+    "novel": 100.0,
+    "unique": 99.8,
+    "novel_and_unique": 99.8
+  },
+  "graphvae": {
+    "novel": 100.0,
+    "unique": 22.3,
+    "novel_and_unique": 22.3
+  }
+}

@@ -1,15 +1,14 @@
 import argparse
-import sys
+import json
+from datetime import datetime
 from pathlib import Path
 
 import torch
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import to_dense_adj, to_dense_batch
 
-sys.path.insert(0, ".")
-
 from src.data import load_mutag
-from src.models.GCN import GraphVAE
+from src.models.graphvae import GraphVAE
 from utils.logger import get_logger
 from utils.settings import settings
 
@@ -17,7 +16,7 @@ logger = get_logger(__name__)
 
 
 @torch.no_grad()
-def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device) -> dict[str, float]:
+def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device, beta: float = 1.0) -> dict[str, float]:
     model.eval()
     total_loss = 0.0
     total_recon = 0.0
@@ -33,7 +32,7 @@ def evaluate(model: GraphVAE, loader: DataLoader, device: torch.device) -> dict[
         z = model.reparameterize(mu, logvar)
         adj_logits = model.decoder(z)
 
-        loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask)
+        loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask, beta=beta)
         total_loss += loss.detach().item()
         total_recon += recon.detach().item()
         total_kl += kl.detach().item()
@@ -56,9 +55,10 @@ def main() -> None:
     parser.add_argument("--hidden-dim", type=int, default=128)
     parser.add_argument("--latent-dim", type=int, default=64)
     parser.add_argument("--grad-clip", type=float, default=1.0)
+    parser.add_argument("--kl-warmup-epochs", type=int, default=50)
+    parser.add_argument("--beta-max", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=settings.RANDOM_SEED)
     parser.add_argument("--device", type=str, default="cuda", choices=["cuda", "cpu"])
-    parser.add_argument("--save-name", type=str, default="graphvae_mutag.pt")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -83,14 +83,20 @@ def main() -> None:
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-    out_dir = Path(settings.OUTPUT_DIR)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    ckpt_path = out_dir / args.save_name
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    run_dir = Path(settings.OUTPUT_DIR) / "train_gvae" / timestamp
+    run_dir.mkdir(parents=True, exist_ok=True)
+    ckpt_path = run_dir / "best_model.pt"
 
     logger.info("Starting training", epochs=args.epochs, batch_size=args.batch_size, lr=args.lr)
 
     best_test = float("inf")
+    best_epoch = 0
+    all_metrics = []
+
     for epoch in range(1, args.epochs + 1):
+        beta = min(args.beta_max, args.beta_max * epoch / args.kl_warmup_epochs) if args.kl_warmup_epochs > 0 else args.beta_max
+
         model.train()
         running_loss = 0.0
         running_recon = 0.0
@@ -107,7 +113,7 @@ def main() -> None:
             z = model.reparameterize(mu, logvar)
             adj_logits = model.decoder(z)
 
-            loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask)
+            loss, recon, kl = model.loss(adj_logits, A_true, mu, logvar, mask, beta=beta)
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -125,7 +131,18 @@ def main() -> None:
             "recon": running_recon / max(1, num_batches),
             "kl": running_kl / max(1, num_batches),
         }
-        test_metrics = evaluate(model, test_loader, device)
+        test_metrics = evaluate(model, test_loader, device, beta=beta)
+
+        all_metrics.append({
+            "epoch": epoch,
+            "beta": beta,
+            "train_loss": train_metrics["loss"],
+            "train_recon": train_metrics["recon"],
+            "train_kl": train_metrics["kl"],
+            "test_loss": test_metrics["loss"],
+            "test_recon": test_metrics["recon"],
+            "test_kl": test_metrics["kl"],
+        })
 
         logger.info(
             "Epoch",
@@ -138,6 +155,7 @@ def main() -> None:
 
         if test_metrics["loss"] < best_test:
             best_test = test_metrics["loss"]
+            best_epoch = epoch
             torch.save(
                 {
                     "model_state_dict": model.state_dict(),
@@ -149,7 +167,22 @@ def main() -> None:
             )
             logger.success("Saved checkpoint", path=str(ckpt_path), best_test=f"{best_test:.4f}")
 
-    logger.success("Done")
+    with open(run_dir / "metrics.json", "w") as f:
+        json.dump(all_metrics, f, indent=2)
+    logger.info("Saved per-epoch metrics", path=str(run_dir / "metrics.json"))
+
+    summary = {
+        "best_test_loss": best_test,
+        "best_epoch": best_epoch,
+        "final_train_loss": train_metrics["loss"],
+        "total_epochs": args.epochs,
+        "hyperparams": vars(args),
+    }
+    with open(run_dir / "summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+    logger.info("Saved summary", path=str(run_dir / "summary.json"))
+
+    logger.success("Done", run_dir=str(run_dir))
 
 
 if __name__ == "__main__":

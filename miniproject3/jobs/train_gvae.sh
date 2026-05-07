@@ -8,4 +8,4 @@
 #BSUB -o jobs/logs/train_gvae_%J.out
 #BSUB -e jobs/logs/train_gvae_%J.err
 
-uv run train_gvae.py --epochs 50 --batch-size 8
+uv run -m entrypoints.train_gvae --epochs 1000 --batch-size 32 --kl-warmup-epochs 50
